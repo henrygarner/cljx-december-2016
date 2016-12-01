@@ -1,0 +1,2343 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<title>Clojure for Machine Learning</title>
+<meta name="author" content="(@henrygarner)"/>
+<style type="text/css">
+.underline { text-decoration: underline; }
+</style>
+<link rel="stylesheet" href="./reveal.js/css/reveal.css"/>
+
+<link rel="stylesheet" href="./reveal.js/css/theme/white.css" id="theme"/>
+
+<link rel="stylesheet" href="./extra.css"/>
+<link rel="stylesheet" href="./reveal.js/lib/css/zenburn.css"/>
+<!-- If the query includes 'print-pdf', include the PDF print sheet -->
+<script>
+    if( window.location.search.match( /print-pdf/gi ) ) {
+        var link = document.createElement( 'link' );
+        link.rel = 'stylesheet';
+        link.type = 'text/css';
+        link.href = './reveal.js/css/print/pdf.css';
+        document.getElementsByTagName( 'head' )[0].appendChild( link );
+    }
+</script>
+<script type="text/javascript" src="MathJax/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+</head>
+<body>
+<div class="reveal">
+<div class="slides">
+<section id="sec-title-slide"><h1>Clojure for Machine Learning</h1><p>@henrygarner</p>
+</section>
+<aside class="notes">
+<p>
+Good afternoon Clojurians of London
+And Clojurians of the world, you're very welcome
+I'd like to thank the organisers for inviting me
+Thank you Chris for the introduction
+I should come clean &#x2026; should really be called
+</p>
+
+</aside>
+
+<section>
+<section id="slide-orgf3d0383">
+<h2 id="orgf3d0383">CLOJURE FOR STATISTICAL INFERENCE &amp; PREDICTIVE ANALYTICS WITH TRANSDUCERS AND VISUALISATION TOO!</h2>
+<aside class="notes">
+<ul>
+<li>But this isn't as snappy</li>
+
+</ul>
+
+</aside>
+
+</section>
+</section>
+<section>
+<section id="slide-org2ec4e24">
+<h2 id="org2ec4e24"><del>CLOJURE FOR STATISTICAL INFERENCE &amp; PREDICTIVE ANALYTICS WITH TRANSDUCERS AND VISUALISATION TOO!</del></h2>
+<aside class="notes">
+<ul>
+<li>So we'll stick with Clojure for Machine Learning</li>
+<li>Plus, I agree with Josh Wills:</li>
+<li>Said at the ML conf SF a few months ago&#x2026;</li>
+
+</ul>
+
+</aside>
+
+</section>
+</section>
+<section>
+<section id="slide-org7a6a410">
+<h2 id="org7a6a410"></h2>
+<p>
+<i><b>“If you can convince an engineer they're doing machine learning, you can get them to do anything”</b></i>
+</p>
+
+<p>
+<i>Josh Wills, Director of Engineering at Slack</i>
+</p>
+
+<aside class="notes">
+<ul>
+<li>Even attend talk about STATISTICS!</li>
+<li>If you haven't heard of Josh before, you might know something else he said:</li>
+
+</ul>
+
+</aside>
+
+</section>
+</section>
+<section>
+<section id="slide-org7487ce4">
+<h2 id="org7487ce4"></h2>
+<p>
+<i><b>“Data Scientist (n.): Person who is better at statistics than any software engineer and better at software engineering than any statistician.”</b></i>
+</p>
+
+<p>
+<i>Josh Wills, Director of Engineering at Slack</i>
+</p>
+
+<aside class="notes">
+<ul>
+<li>I want to raise the mean statistical understanding in the room</li>
+<li>As we work more and more with data it's an important professional skill</li>
+
+</ul>
+
+</aside>
+
+</section>
+</section>
+<section>
+<section id="slide-orgf985562">
+<h2 id="orgf985562"></h2>
+
+<div class="figure">
+<p><img src="./assets/polling-error.png" alt="polling-error.png" />
+</p>
+</div>
+
+<aside class="notes">
+<ul>
+<li>In fact, go further, important life skill</li>
+<li>better prepared for the apparent voltaility in the world</li>
+<li>It'll be stats and ML 101, so if you already know either</li>
+
+</ul>
+
+</aside>
+
+</section>
+</section>
+<section>
+<section id="slide-orgced8834">
+<h2 id="orgced8834">#sorrynotsorry</h2>
+<aside class="notes">
+<ul>
+<li>I'm really sorry</li>
+<li>Hopefully you'll learn a little about visualisation and transducers too</li>
+<li>If instead you find me going a little quickly (on GitHub)</li>
+
+</ul>
+
+</aside>
+
+</section>
+</section>
+<section>
+<section id="slide-orgb6612b7">
+<h2 id="orgb6612b7">Contents</h2>
+<ul>
+<li data-fragment-index="1" class="fragment appear">Bandit testing
+<ul>
+<li data-fragment-index="4" class="fragment appear">Inference &amp; significance</li>
+<li data-fragment-index="7" class="fragment appear"><code>kixi.stats</code></li>
+
+</ul></li>
+<li data-fragment-index="2" class="fragment appear">Regression models
+<ul>
+<li data-fragment-index="5" class="fragment appear">Goodness of fit</li>
+<li data-fragment-index="8" class="fragment appear"><code>redux</code></li>
+
+</ul></li>
+<li data-fragment-index="3" class="fragment appear">Neural networks
+<ul>
+<li data-fragment-index="6" class="fragment appear">Feature learning</li>
+<li data-fragment-index="9" class="fragment appear"><code>cortex</code></li>
+
+</ul></li>
+
+</ul>
+
+<aside class="notes">
+<ul>
+<li>Will be 3 related sections to this talk</li>
+<li>&#x2026; 3 themes</li>
+<li>&#x2026; 3 primary libraries</li>
+<li>Author of first 2, excited by the 3rd</li>
+<li>First a little about my background and motivation for the talk</li>
+
+</ul>
+
+</aside>
+
+</section>
+</section>
+<section>
+<section id="slide-orga0fd1ef" data-background="./assets/elit.png">
+<h2 id="orga0fd1ef"></h2>
+<aside class="notes">
+<ul>
+<li>Freelance data scientist working in Clojure</li>
+<li>Currently consulting with English Language iTutoring</li>
+<li>Technology transfer business bringing NLP technology to market</li>
+<li>Latest product is Write &amp; Improve</li>
+
+</ul>
+
+</aside>
+
+</section>
+</section>
+<section>
+<section id="slide-org992e6be">
+<h2 id="org992e6be"></h2>
+
+<div class="figure">
+<p><object type="image/svg+xml" data="./assets/writeandimprove.svg" class="org-svg">
+Sorry, your browser does not support SVG.</object>
+</p>
+</div>
+
+<p>
+<a href="http://writeandimprove.com/">http://writeandimprove.com/</a>
+</p>
+
+<aside class="notes">
+<ul>
+<li>Allows EFL larners to improve their written English</li>
+<li>Launched a few months ago</li>
+<li>Check it out. Free and don't need account</li>
+<li>Also hiring. Bristol. No stats.</li>
+
+</ul>
+
+</aside>
+
+</section>
+</section>
+<section>
+<section id="slide-org45f7f2c">
+<h2 id="org45f7f2c"></h2>
+
+<div class="figure">
+<p><img src="./assets/wandi-feedback.png" alt="wandi-feedback.png" />
+</p>
+</div>
+
+<aside class="notes">
+<ul>
+<li>Learner arrives at site. Can select a prompt and fill out a written response.</li>
+<li>Enter text in response to prompt. Feedback in 10-15s</li>
+
+</ul>
+
+</aside>
+
+</section>
+</section>
+<section>
+<section id="slide-org44dd015">
+<h2 id="org44dd015"></h2>
+
+<div class="figure">
+<p><img src="./assets/wandi-correction.png" alt="wandi-correction.png" />
+</p>
+</div>
+
+<aside class="notes">
+<ul>
+<li>Feedback:
+<ul>
+<li>misplaced, misspelled words</li>
+<li>grammatical errors</li>
+
+</ul></li>
+<li>Learner considers, resubmits, iterates</li>
+
+</ul>
+
+</aside>
+
+</section>
+</section>
+<section>
+<section id="slide-orgccb1bbd">
+<h2 id="orgccb1bbd"></h2>
+
+<div class="figure">
+<p><img src="./assets/refresh.png" alt="refresh.png" />
+</p>
+</div>
+
+<aside class="notes">
+<ul>
+<li>Backend is a perceptron-based model trained on annotated scripts</li>
+<li>Each new submission is also annotated by humans</li>
+<li>Virtuous cycle</li>
+<li>Wanted to adopt same iterative improvement to site design</li>
+<li>For example, how to present feedback for best learner results</li>
+
+</ul>
+
+</aside>
+
+</section>
+</section>
+<section>
+<section id="slide-org0fc0866">
+<h2 id="org0fc0866"></h2>
+
+<div class="figure">
+<p><img src="./assets/conversion-rates.png" alt="conversion-rates.png" />
+</p>
+</div>
+
+<aside class="notes">
+<ul>
+<li>Typical A/B tests split users into two or more groups</li>
+<li>Trial each variation and measure conversion rate</li>
+<li>Each trial is a series of tests with a binary outcome</li>
+<li>(it's called a Bernoulli trial)</li>
+
+</ul>
+
+</aside>
+
+</section>
+</section>
+<section>
+<section id="slide-orgfcbc900">
+<h2 id="orgfcbc900"></h2>
+<ul>
+<li data-fragment-index="1" class="fragment appear">H H T H T</li>
+<li data-fragment-index="2" class="fragment appear">T H H H T</li>
+<li data-fragment-index="3" class="fragment appear">H H H H H</li>
+<li data-fragment-index="4" class="fragment appear">H H H H H H H H H H H H H H H</li>
+
+</ul>
+
+<aside class="notes">
+<ul>
+<li>Coin flips are a Bernoulli trial</li>
+<li>Say we flip a coin 5 times, you'd expect some uncertainty in the results</li>
+<li>Not impossible we'd get all heads</li>
+<li>Probability diminishes the more trials you run</li>
+
+</ul>
+
+</aside>
+
+</section>
+</section>
+<section>
+<section id="slide-org3f8e150">
+<h2 id="org3f8e150"></h2>
+<p>
+♥️
+</p>
+
+<p>
+Reagent
+</p>
+<p data-fragment-index="1" class="fragment appear">
+<i>interactive UIs</i>
+</p>
+
+<p>
+thi.ng/geom-viz
+</p>
+<p data-fragment-index="1" class="fragment appear">
+<i>SVG graphs</i>
+</p>
+
+<p>
+jStat
+</p>
+<p data-fragment-index="1" class="fragment appear">
+<i>JavaScript distributions</i>
+</p>
+
+<aside class="notes">
+<ul>
+<li>Fan of Bret Victor, learnable programming</li>
+<li>Learning any technical skill is enhanced by immediate feedback</li>
+<li>I use these libraries for interactive visualisations</li>
+<li>Won't explain code, available on GitHub</li>
+
+</ul>
+
+</aside>
+
+</section>
+</section>
+<section>
+<section id="slide-org7cff81c">
+<h2 id="org7cff81c"></h2>
+<iframe src="./cljx/resources/public/simulation.html" width="600" height="400"></iframe>
+
+<p>
+Distribution over <i>k</i>
+</p>
+
+<aside class="notes">
+<ul>
+<li>For a fair coin, we'd expect heads 50% of the time</li>
+<li>Simulation shows for a given n and p, disibution over k, number of heads</li>
+<li>Looks normal, but it's discrete (you can't throw 1.5 heads), it's actually binomial</li>
+
+</ul>
+
+</aside>
+
+</section>
+</section>
+<section>
+<section id="slide-org4791e20">
+<h2 id="org4791e20"></h2>
+<iframe src="./cljx/resources/public/binomial.html" width="800" height="400"></iframe>
+
+<p>
+Distribution over <i>k</i>
+</p>
+
+<aside class="notes">
+<ul>
+<li>Visualise binomial distribution</li>
+<li>We can adjust the n and p parameters see how the distribution over k varies</li>
+<li>Skewed extremes, because k can't be less than 0 or exceed 1</li>
+
+</ul>
+
+</aside>
+
+</section>
+</section>
+<section>
+<section id="slide-org45b3ef1">
+<h2 id="org45b3ef1"></h2>
+
+<div class="figure">
+<p><img src="./assets/probability-distributions.png" alt="probability-distributions.png" />
+</p>
+</div>
+
+<aside class="notes">
+<ul>
+<li>What we usually want to do in analytics is work backwards from what we can see to what we can't</li>
+<li>Observations to potential causes (Statistical inference)</li>
+<li>Turns out given n and k, distribution of p is given by beta distribution</li>
+<li>Simulate&#x2026;</li>
+
+</ul>
+
+</aside>
+
+</section>
+</section>
+<section>
+<section id="slide-org5ad6f92">
+<h2 id="org5ad6f92"></h2>
+<iframe src="./cljx/resources/public/index.html" width="800" height="400"></iframe>
+
+<p>
+Distribution over <i>p</i>
+</p>
+
+<aside class="notes">
+<ul>
+<li>Now we control only the things we observe, n and k.</li>
+<li>More data gives more certainty that the value lies at a particular spot.</li>
+<li>It's a model of our confidence in the true conversion rate, based on our sample</li>
+
+</ul>
+
+</aside>
+
+</section>
+</section>
+<section>
+<section id="slide-org591d86d">
+<h2 id="org591d86d"></h2>
+
+<div class="figure">
+<p><img src="./assets/diff-beta.png" alt="diff-beta.png" />
+</p>
+</div>
+
+<aside class="notes">
+<ul>
+<li>Useful because we can compare</li>
+<li>One of these conversion rates looks much better than the other</li>
+
+</ul>
+
+</aside>
+
+
+</section>
+</section>
+<section>
+<section id="slide-org6de9278">
+<h2 id="org6de9278"></h2>
+
+<div class="figure">
+<p><img src="./assets/similar-beta.png" alt="similar-beta.png" />
+</p>
+</div>
+
+<aside class="notes">
+<ul>
+<li>Whereas these could be the same, different due to chance measurement error</li>
+<li>There's a precise way to formulate what I just said mathematically</li>
+<li>That's the intuition</li>
+
+</ul>
+
+</aside>
+
+</section>
+</section>
+<section>
+<section id="slide-org751e490">
+<h2 id="org751e490"></h2>
+
+<div class="figure">
+<p><img src="./assets/more-data.png" alt="more-data.png" />
+</p>
+</div>
+
+<aside class="notes">
+<ul>
+<li>Proportional difference is the same</li>
+<li>More data allows us to be more cetain that the two distributions represent different conversion rates</li>
+<li>Statistical power: ability to detect a difference where there is one</li>
+
+</ul>
+
+</aside>
+
+</section>
+</section>
+<section>
+<section id="slide-orgf9c6906">
+<h2 id="orgf9c6906"></h2>
+<video controls><source data-src="./assets/bandit_coins.mov"/></video>
+
+<aside class="notes">
+<ul>
+<li>Everything I have shown you applies to A/B tests</li>
+<li>Principle behind a bandit test, prioritise the best-performing variation</li>
+<li>Simulation dynamically allocates resources to a variation in proportion to probability that it is the best</li>
+<li>Poorer-performing variation is given a fair chance, but most learners see better one</li>
+
+</ul>
+
+</aside>
+
+</section>
+</section>
+<section>
+<section id="slide-org5991fc6">
+<h2 id="org5991fc6"></h2>
+<div class="org-src-container">
+
+<pre><code class="clojure" >(def trials
+  {:trial-1 {:n 10 :k 5}
+   :trial-2 {:n 20 :k 10}}
+
+(defn bayes-bandit
+  [trials]
+  (let [score (fn [{:keys [n k]}]
+                (sample-beta 1 :alpha (inc k) :beta (inc (- n k))))]
+    (key (apply max-key (comp score val) trials))))
+</code></pre>
+</div>
+
+<aside class="notes">
+<ul>
+<li>Given two trials with observed n and k</li>
+<li>Sample a value from each beta distribution with given parameters, pick the winner</li>
+<li>Sample will tend to be better for the better variation, in proportion to how much better it is</li>
+<li>Will sometimes be worse, so we can continue to explore other variations</li>
+<li>Thompson sampling</li>
+
+</ul>
+
+</aside>
+
+</section>
+</section>
+<section>
+<section id="slide-org316ec10">
+<h2 id="org316ec10"></h2>
+
+<div class="figure">
+<p><img src="./assets/cassidy.png" alt="cassidy.png" />
+</p>
+</div>
+
+<aside class="notes">
+<ul>
+<li>For W&amp;I we abstract all of this out into a Clojure service</li>
+<li>Because although is a couple of lines of code, statistical validity requires a bit more work</li>
+
+</ul>
+
+</aside>
+
+</section>
+</section>
+<section>
+<section id="slide-org4a2cdec">
+<h2 id="org4a2cdec">Beware</h2>
+<ul>
+<li data-fragment-index="1" class="fragment appear">Ensure trials are independent
+<ul>
+<li>Test users, not visits</li>
+
+</ul></li>
+<li data-fragment-index="2" class="fragment appear">Has the variation been seen?
+<ul>
+<li><i>Assigned</i> variations may not be <i>active</i> variations</li>
+
+</ul></li>
+<li data-fragment-index="3" class="fragment appear">Don't call too early
+<ul>
+<li>Conversion may take a day or longer. Wait and see.</li>
+
+</ul></li>
+<li data-fragment-index="4" class="fragment appear">Not a panacea
+<ul>
+<li>A sensible prior will stabilise early fluctuations</li>
+
+</ul></li>
+
+</ul>
+
+<aside class="notes">
+<ul>
+<li>Prior is our expectation before we've gathered any evidence</li>
+<li>We don't want it to outweigh evidence, so prior is balanced</li>
+<li>Paraphrase XKCD. Test 1% error that sun has just exploded.</li>
+<li>We choose a prior that's based on our average conversion rate</li>
+
+</ul>
+
+</aside>
+
+</section>
+</section>
+<section>
+<section id="slide-org353da2e">
+<h2 id="org353da2e"></h2>
+<div class="org-src-container">
+
+<pre><code class="clojure" >(def trials
+  {:trial-1 {:n 10 :k 5}
+   :trial-2 {:n 20 :k 10}}
+
+(defn bayes-bandit
+  [trials]
+  (let [score (fn [{:keys [n k]}]
+                (sample-beta 1 :alpha (inc (+ k 10))
+                               :beta  (inc (+ (- n k) 40))))]
+    (key (apply max-key (comp score val) trials))))
+</code></pre>
+</div>
+
+<aside class="notes">
+<ul>
+<li>If conversion rate was 20%, we'd add 10 to our alpha and 40 to our beta.</li>
+<li>This means that the evidence starts to outweight prior once we've run 50 tests</li>
+<li>Want to talk about confidence in machine learning</li>
+
+</ul>
+
+</aside>
+
+</section>
+</section>
+<section>
+<section id="slide-org4fc00e8">
+<h2 id="org4fc00e8"></h2>
+
+<div class="figure">
+<p><img src="./assets/clojurex2015.jpg" alt="clojurex2015.jpg" />
+</p>
+</div>
+
+<aside class="notes">
+<ul>
+<li>I presented last year about expressive parallel analytics with Clojure's transducers</li>
+<li>Pause whilst the photographer gets the beginnings of an infinite regress</li>
+
+</ul>
+
+</aside>
+</section>
+</section>
+<section>
+<section id="slide-orgcc555ac">
+<h2 id="orgcc555ac"></h2>
+<div class="org-src-container">
+
+<pre><code class="clojure" >(transduce (map inc) + (range 10))
+</code></pre>
+</div>
+
+<aside class="notes">
+<ul>
+<li>What excited me about transducers was not the transducers themselves</li>
+<li>But the reducing functions, because with transducers they get a lifecycle</li>
+
+</ul>
+
+</aside>
+
+</section>
+</section>
+<section>
+<section id="slide-orgcbd4c93">
+<h2 id="orgcbd4c93"></h2>
+<ul>
+<li data-fragment-index="1" class="fragment appear">Init</li>
+<li data-fragment-index="2" class="fragment appear">Step</li>
+<li data-fragment-index="3" class="fragment appear">Complete</li>
+
+</ul>
+
+<div class="org-src-container">
+
+<pre class="fragment (appear)"><code class="clojure" >(fn +'
+  ([] 0)       ;; init
+  ([acc x]
+    (+ acc x)) ;; step
+  ([acc] acc)) ;; complete
+</code></pre>
+</div>
+
+<aside class="notes">
+<ul>
+<li>Lifecycle consists of three phases</li>
+<li>Since I gave that talk I've released a library called</li>
+
+</ul>
+
+</aside>
+
+</section>
+</section>
+<section>
+<section id="slide-orgfa74078">
+<h2 id="orgfa74078"></h2>
+
+<div class="figure">
+<p><img src="./assets/kixi.png" alt="kixi.png" />
+</p>
+</div>
+
+<p>
+KIXI.STATS
+</p>
+
+<p>
+<a href="https://github.com/mastodonc/kixi.stats">https://github.com/mastodonc/kixi.stats</a>
+</p>
+
+<ul data-fragment-index="1" class="fragment appear)">
+<li>Mean</li>
+<li>Variance</li>
+<li>Standard deviation</li>
+<li>Covariance</li>
+<li>Correlation</li>
+<li>Simple linear regression</li>
+
+</ul>
+
+<aside class="notes">
+<ul>
+<li>Contains most of the popular sequence stats</li>
+<li>And lesser-used, like skewness and kurtosis</li>
+
+</ul>
+
+</aside>
+
+</section>
+</section>
+<section>
+<section id="slide-org5ef0e95">
+<h2 id="org5ef0e95">"Awkward-sized data"</h2>
+
+<div class="figure">
+<p><img src="./assets/bruce.jpg" alt="bruce.jpg" />
+</p>
+</div>
+
+
+<aside class="notes">
+<ul>
+<li>Designed for awkward-sized data</li>
+<li>Too small for Spark, but large enough to be work optimising</li>
+<li>All functions operate in only a single pass over the data</li>
+
+</ul>
+
+</aside>
+
+</section>
+</section>
+<section>
+<section id="slide-orgfa3ae34">
+<h2 id="orgfa3ae34"></h2>
+<p>
+<a href="https://www.theguardian.com/sport/datablog/2012/aug/07/olympics-2012-athletes-age-weight-height">https://www.theguardian.com/sport/datablog/2012/aug/07/olympics-2012-athletes-age-weight-height</a>
+</p>
+
+<div class="org-src-container">
+
+<pre><code class="clojure" >{:sport "Swimming",
+ :age 27,
+ :sex "M",
+ :birth-place "Towson (USA)",
+ :name "Michael Phelps",
+ :bronze 0,
+ :birth-date "6/30/1985",
+ :gold 2,
+ :weight 88,
+ :silver 2,
+ :height 193}
+</code></pre>
+</div>
+
+<aside class="notes">
+<ul>
+<li>Sourced some awkward sized data from the Guardian</li>
+<li>Attributes of athletes from 2012 games, height weight etc</li>
+
+</ul>
+
+</aside>
+
+</section>
+</section>
+<section>
+<section id="slide-orga5b0058">
+<h2 id="orga5b0058"></h2>
+
+<div class="figure">
+<p><img src="./assets/height-histogram.png" alt="height-histogram.png" />
+</p>
+</div>
+
+<aside class="notes">
+<ul>
+<li>I'm sure we all know that heights are normally distributed</li>
+<li>Normal distribution is parameterised by two values:
+<ul>
+<li>Mean</li>
+<li>Standard deviation</li>
+
+</ul></li>
+<li>We can calculate these using Kixi.stats like this:</li>
+
+</ul>
+
+</aside>
+
+</section>
+</section>
+<section>
+<section id="slide-org0850d0a">
+<h2 id="org0850d0a"></h2>
+<div class="org-src-container">
+
+<pre><code class="clojure" >(require '[kixi.stats.core :as kixi])
+
+(-&gt;&gt; (data-source "athletes.txt")
+     (transduce (map :height) kixi/mean))
+
+;; =&gt; 1603855/9038
+
+(-&gt;&gt; (data-source "athletes.txt")
+     (transduce (map :height) kixi/standard-deviation))
+
+;; =&gt; 11.202506235734145
+</code></pre>
+</div>
+
+<aside class="notes">
+<ul>
+<li>We transduce over the athletes mapping the heights</li>
+<li>Passing the relevant reducing function</li>
+<li>Cal also calculate more intricate output&#x2026;</li>
+
+</ul>
+
+</aside>
+
+</section>
+</section>
+<section>
+<section id="slide-org26118ae">
+<h2 id="org26118ae"></h2>
+<div class="org-src-container">
+
+<pre><code class="clojure" >(require '[kixi.stats.core :as kixi])
+
+(def rf
+  (kixi/correlation-matrix {:height :height
+                            :weight :weight
+                            :age :age}))
+
+(-&gt;&gt; (data-source "athletes.txt")
+     (transduce identity rf))
+
+;; {[:height :weight] 0.7602753595140576,
+;;  [:height :age]    0.0835619870171009,
+;;  [:weight :height] 0.7602753595140576,
+;;  [:weight :age]    0.1263794369985025,
+;;  [:age :height]    0.0835619870171009,
+;;  [:age :weight]    0.1263794369985025}
+</code></pre>
+</div>
+
+<aside class="notes">
+<ul>
+<li>Such as correlation matrix</li>
+<li>Correlation for each pair of values</li>
+
+</ul>
+
+</aside>
+
+</section>
+</section>
+<section>
+<section id="slide-org8d27bb3">
+<h2 id="org8d27bb3"></h2>
+<div class="org-src-container">
+
+<pre><code class="clojure" >(require '[kixi.stats.core :as kixi])
+
+(def rf
+  (kixi/correlation-matrix {:height :height
+                            :weight :weight
+                            :age :age}))
+
+(-&gt;&gt; (data-source "athletes.txt")
+     (transduce (filter swimmer?) rf))
+
+;; {[:height :weight] 0.8649145683086642,
+;;  [:height :age]    0.3011551185677323,
+;;  [:weight :height] 0.8649145683086642,
+;;  [:weight :age]    0.32150444584208426,
+;;  [:age :height]    0.3011551185677323,
+;;  [:age :weight]    0.32150444584208426}
+</code></pre>
+</div>
+
+<aside class="notes">
+<ul>
+<li>Filter to just swimmers, correlation goes up</li>
+<li>There's a clearer relationship filter to just particular body type</li>
+
+</ul>
+
+</aside>
+
+</section>
+</section>
+<section>
+<section id="slide-org42e3a60">
+<h2 id="org42e3a60"></h2>
+
+<div class="figure">
+<p><img src="./assets/scatter-correlation.png" alt="scatter-correlation.png" />
+</p>
+</div>
+
+<aside class="notes">
+<ul>
+<li>Plotting correlation on a scatter plot in GorillaREPL clearly shows the relationship</li>
+<li>Note correlation isn't the slope of the line</li>
+<li>Single measure of how close to being a straight line it is</li>
+
+</ul>
+
+</aside>
+
+</section>
+</section>
+<section>
+<section id="slide-orge9ab35c">
+<h2 id="orge9ab35c"></h2>
+<p>
+\[{y = ax + b}\]
+</p>
+
+<aside class="notes">
+<ul>
+<li>To plot an actual line, you need two parameters</li>
+<li>Slope a and offset b</li>
+<li>Linear equation</li>
+
+</ul>
+
+</aside>
+
+</section>
+</section>
+<section>
+<section id="slide-org808a93c">
+<h2 id="org808a93c"></h2>
+
+<div class="figure">
+<p><img src="./assets/7180OS-03-200.png" alt="7180OS-03-200.png" />
+</p>
+</div>
+
+<aside class="notes">
+<ul>
+<li>Here's a plot for the precise relationship between two temperature scales</li>
+<li>It's exact, no scatter. Correlation is 1.0</li>
+
+</ul>
+
+</aside>
+
+</section>
+</section>
+<section>
+<section id="slide-org8eefad0">
+<h2 id="org8eefad0"></h2>
+<p>
+\[{Fahrenheit = 1.8 * Centigrade + 32}\]
+</p>
+
+<aside class="notes">
+<ul>
+<li>However the a and b, parameters to linear model are 1.8 and 32.</li>
+<li>We can calculate line of best fit for our swimmers too</li>
+
+</ul>
+
+</aside>
+
+</section>
+</section>
+<section>
+<section id="slide-org93d8b7f">
+<h2 id="org93d8b7f"></h2>
+<div class="org-src-container">
+
+<pre><code class="clojure" >(require '[kixi.stats.core :as kixi])
+
+(def rf
+  (kixi/simple-linear-regression :height :weight))
+
+(-&gt;&gt; (data-source "athletes.txt")
+     (transduce (filter swimmer?) rf))
+
+;; [-1286496024/11650283 11809306/11650283]
+</code></pre>
+</div>
+
+<aside class="notes">
+<ul>
+<li>Using the simple-linear-regression reducing function</li>
+<li>return the parameters to the model, a and b</li>
+
+</ul>
+
+</aside>
+
+</section>
+</section>
+<section>
+<section id="slide-orgf39e65b">
+<h2 id="orgf39e65b"></h2>
+
+<div class="figure">
+<p><img src="./assets/swimmer-regression.png" alt="swimmer-regression.png" />
+</p>
+</div>
+
+<aside class="notes">
+<ul>
+<li>Plot line looks like the best fit for the data</li>
+<li>We can use this line to predict the weight for an olympic swimmer given the height</li>
+<li>Don't want to evaluate on the same data trained on. Want another olympian</li>
+
+</ul>
+
+</aside>
+
+</section>
+</section>
+<section>
+<section id="slide-org61a16e9">
+<h2 id="org61a16e9"></h2>
+
+<div class="figure">
+<p><img src="./assets/mark-spitz.jpg" alt="mark-spitz.jpg" />
+</p>
+</div>
+
+<aside class="notes">
+<ul>
+<li>Mark Spitz was the Michael Phelps of his day</li>
+<li>Racking up an impressive 7 gold medals in the 1972 Olympics</li>
+
+</ul>
+
+</aside>
+
+</section>
+</section>
+<section>
+<section id="slide-orgeecd64e">
+<h2 id="orgeecd64e"></h2>
+
+<div class="figure">
+<p><img src="./assets/mark-spitz-wikipedia.png" alt="mark-spitz-wikipedia.png" />
+</p>
+</div>
+
+<aside class="notes">
+<ul>
+<li>Look up his height and weight Wikipedia: 183cm and 73kg.</li>
+<li>Should we plug that weight into the equation? NO!</li>
+<li>Those numbers are recent, and Mark hasn't competed at Olympic standard for 30 years</li>
+<li>In other words, not part of the population we've trained on</li>
+
+</ul>
+
+</aside>
+
+</section>
+</section>
+<section>
+<section id="slide-org5d7a66e">
+<h2 id="org5d7a66e"></h2>
+
+<div class="figure">
+<p><img src="./assets/literary-digest-poll.png" alt="literary-digest-poll.png" />
+</p>
+</div>
+
+<aside class="notes">
+<ul>
+<li>Sample bias</li>
+<li>Infamous 1936 Presidential election poll, Literary digest sampled 10 million</li>
+<li>Largest poll ever recorded. Scoured magazine subscriptions, telephone directories</li>
+<li>Confidently predicted a win for Landon.</li>
+
+</ul>
+
+</aside>
+
+</section>
+</section>
+<section>
+<section id="slide-org1eec1a6">
+<h2 id="org1eec1a6"></h2>
+
+<div class="figure">
+<p><img src="./assets/literary-digest-red.jpg" alt="literary-digest-red.jpg" />
+</p>
+</div>
+
+<aside class="notes">
+<ul>
+<li>In the envent Roosevelt won by a large margin</li>
+<li>Favoured middle and upper-class voters</li>
+<li>This same problem occurs with W&amp;I: Shakespeare / fluent English</li>
+<li>An accurate small sample is much better than an inaccurate large one</li>
+
+</ul>
+
+</aside>
+
+</section>
+</section>
+<section>
+<section id="slide-org302c44b">
+<h2 id="org302c44b"></h2>
+<p>
+<a href="http://www.topendsports.com/athletes/swimming/spitz-mark.htm">http://www.topendsports.com/athletes/swimming/spitz-mark.htm</a>
+</p>
+
+<div class="org-src-container">
+
+<pre><code class="clojure" >(def fy :weight)
+(def fx :height)
+(def regression
+  (stats/simple-linear-regression fx fy))
+
+(def data (filter swimmer? (data-source "athletes")))
+
+(let [[b a] (transduce identity regression data)
+      predict (fn [x]
+                (double (+ (* a x) b)))]
+  (predict 185))
+
+;; 77.09903579166274
+</code></pre>
+</div>
+
+<aside class="notes">
+<ul>
+<li>So we can find Mark's competition height on the topendsports website</li>
+<li>185 cm</li>
+<li>Predicts a weight of 77kg, vs competition weight of 79kg</li>
+
+<li>Like any model, our model has some error associated with it</li>
+<li>Comes from two places&#x2026;</li>
+
+</ul>
+
+</aside>
+
+</section>
+</section>
+<section>
+<section id="slide-orgdaaa6a6">
+<h2 id="orgdaaa6a6"></h2>
+
+<div class="figure">
+<p><img src="./assets/03_18.png" alt="03_18.png" />
+</p>
+</div>
+
+<aside class="notes">
+<ul>
+<li>There's an error around the line of best fit, based on the sample</li>
+<li>Also variance of individual data points around the line of best fit</li>
+<li>Two errors compound</li>
+<li>We've reported prediction, should report error too</li>
+
+</ul>
+
+</aside>
+
+</section>
+</section>
+<section>
+<section id="slide-orgfca3588">
+<h2 id="orgfca3588"></h2>
+<div class="org-src-container">
+
+<pre><code class="clojure" >(def fy :weight)
+(def fx :height)
+
+(def estimate-error
+  (stats/standard-error-prediction fx fy 185))
+
+(def data (filter swimmer? (data-source "athletes")))
+
+(let [[b a] (transduce identity regression data)
+      std-e (transduce identity estimate-error data)
+      confidence-interval (fn [x]
+                            (let [estimate (double (+ (* a x) b))]
+                              [(- estimate (* std-e 1.94))
+                               (+ estimate (* std-e 1.94))]))]
+  (confidence-interval 185))
+
+;; [65.97046903896646 88.22760254435903]
+</code></pre>
+</div>
+
+<aside class="notes">
+<ul>
+<li>kixi.stats contains standard-error-prediction</li>
+<li>From the standard error can calculate confidence intervals</li>
+<li>e.g.(fuzzy) about 95% of points within 1.94 s.e. prediction</li>
+<li>Have to include height in our s.e. calc because:</li>
+
+</ul>
+
+</aside>
+
+</section>
+</section>
+<section>
+<section id="slide-org24f05d0">
+<h2 id="org24f05d0"></h2>
+
+<div class="figure">
+<p><img src="./assets/03_19.png" alt="03_19.png" />
+</p>
+</div>
+
+<aside class="notes">
+<ul>
+<li>The error bars are actually flared</li>
+<li>More apparent with less data</li>
+
+</ul>
+
+</aside>
+
+
+</section>
+</section>
+<section>
+<section id="slide-org8692e59">
+<h2 id="org8692e59">[69.97 ≤ 79 ≤ 88.22]</h2>
+<aside class="notes">
+<ul>
+<li>Anyway our model has done a pretty good job</li>
+
+</ul>
+
+</aside>
+
+</section>
+</section>
+<section>
+<section id="slide-orgfe9fe74">
+<h2 id="orgfe9fe74">[69.97 ≤ 79 ≤ 88.22]</h2>
+<p>
+✅
+</p>
+<aside class="notes">
+<ul>
+<li>But it's quite a wide interval</li>
+<li>Reason is that model isn't accounting for all the variance in weight</li>
+
+</ul>
+
+</aside>
+
+</section>
+</section>
+<section>
+<section id="slide-org1ab17b3">
+<h2 id="org1ab17b3"></h2>
+
+<div class="figure">
+<p><img src="./assets/03_14_a.png" alt="03_14_a.png" />
+</p>
+</div>
+
+<aside class="notes">
+<ul>
+<li>Without a model, if I asked you to guess weight given height</li>
+<li>Guess mean (y-bar)</li>
+<li>Average error is going to be MSE from the mean (avg size of square)</li>
+
+</ul>
+
+</aside>
+
+</section>
+</section>
+<section>
+<section id="slide-orgcea1969">
+<h2 id="orgcea1969"></h2>
+
+<div class="figure">
+<p><img src="./assets/03_14_b.png" alt="03_14_b.png" />
+</p>
+</div>
+
+<aside class="notes">
+<ul>
+<li>If you go to the trouble of creating a linear model, you'll predict f</li>
+<li>Now average error is mean squared error of the residuals</li>
+<li>The ratio of these two errors is variance unexplained</li>
+<li>The complement is the explained, called r-square</li>
+<li>Introduce another library to calculate</li>
+
+</ul>
+
+</aside>
+
+</section>
+</section>
+<section>
+<section id="slide-org6cf684c">
+<h2 id="org6cf684c">redux</h2>
+<p>
+<a href="https://github.com/henrygarner/redux">https://github.com/henrygarner/redux</a>
+</p>
+
+<ul>
+<li data-fragment-index="2" class="fragment appear"><code>pre-step</code></li>
+<li data-fragment-index="3" class="fragment appear"><code>post-complete</code></li>
+<li data-fragment-index="4" class="fragment appear"><code>fuse</code></li>
+<li data-fragment-index="5" class="fragment appear">+ more!</li>
+
+</ul>
+
+<aside class="notes">
+<ul>
+<li>A library of reducing function combinators</li>
+<li>pre-step associates a function to call before each step</li>
+<li>post-complete associates a function to be called at the end of the reduction</li>
+<li>fuse will compute the results of several rfs in parallel</li>
+
+</ul>
+
+</aside>
+
+</section>
+</section>
+<section>
+<section id="slide-org51de69a">
+<h2 id="org51de69a"></h2>
+<div class="org-src-container">
+
+<pre><code class="clojure" >(def rf
+  (fuse {:mean kixi/mean
+         :sd kixi/standard-deviation}))
+
+(transduce (map :height) rf (data-source "athletes.txt"))
+
+;; =&gt; {:mean 1603855/9038, :sd 11.202506235734145}
+</code></pre>
+</div>
+
+<aside class="notes">
+<ul>
+<li>Can calculate mean and sd in a single pass</li>
+<li>Let's use redux to calculate the R-square</li>
+
+</ul>
+
+</aside>
+
+</section>
+</section>
+<section>
+<section id="slide-org04b37f0">
+<h2 id="org04b37f0">R-square</h2>
+<p>
+\[{{R^2 = 1 - \frac{var(e)}{var(Y)}}}\]
+</p>
+
+<aside class="notes">
+<ul>
+<li>here's the equation</li>
+<li>mentioned is the complement of the variance left unexplained by the model</li>
+<li>Build up the function in a few steps</li>
+
+</ul>
+
+</aside>
+
+</section>
+</section>
+<section>
+<section id="slide-orgf4eabc0">
+<h2 id="orgf4eabc0">R-square</h2>
+<div class="org-src-container">
+
+<pre><code class="clojure" >(defn residual [fy-hat fy]
+  #(- (fy-hat %) (fy %)))
+
+(defn r-square [fy-hat fy]
+
+                  (pre-step variance (residual fy-hat fy))
+                  (pre-step variance fy)
+
+                             )
+</code></pre>
+</div>
+
+<aside class="notes">
+<ul>
+<li>Define a function for calculating the residual error of the model</li>
+<li>Apply it as a pre-step, so you're calculating the variance of that</li>
+<li>And the variance of the ys</li>
+
+</ul>
+
+</aside>
+
+</section>
+</section>
+<section>
+<section id="slide-orge2f8690">
+<h2 id="orge2f8690">R-square</h2>
+<div class="org-src-container">
+
+<pre><code class="clojure" >(defn residual [fy-hat fy]
+  #(- (fy-hat %) (fy %)))
+
+(defn r-square [fy-hat fy]
+
+    (fuse {:var-e (pre-step variance (residual fy-hat fy))
+           :var-y (pre-step variance fy)})
+
+                             )
+</code></pre>
+</div>
+
+<aside class="notes">
+<ul>
+<li>name the calculations and fuse them together</li>
+<li>so you're calculating both in a single pass</li>
+
+</ul>
+
+</aside>
+
+</section>
+</section>
+<section>
+<section id="slide-org8387a71">
+<h2 id="org8387a71">R-square</h2>
+<div class="org-src-container">
+
+<pre><code class="clojure" >(defn residual [fy-hat fy]
+  #(- (fy-hat %) (fy %)))
+
+(defn r-square [fy-hat fy]
+  (post-complete
+    (fuse {:var-e (pre-step variance (residual fy-hat fy))
+           :var-y (pre-step variance fy)})
+    (fn [{:keys [var-e var-y]}]
+      (- 1 (/ var-e var-y)))))
+</code></pre>
+</div>
+
+<aside class="notes">
+<ul>
+<li>Add a post-complete step, to transform the map of two variances</li>
+<li>into the r-square. We're done!</li>
+
+</ul>
+
+</aside>
+
+</section>
+</section>
+<section>
+<section id="slide-orge8046c5">
+<h2 id="orge8046c5">R-square</h2>
+<div class="org-src-container">
+
+<pre><code class="clojure" >(def fy :weight)
+(def fx :height)
+(def regression (kixi/simple-linear-regression fx fy))
+(def data (filter swimmer? (data-source "athletes")))
+
+(let [[b a] (transduce identity regression data)
+      estimate (fn [x] (+ (* a x) b))
+      goodness-of-fit (r-square (comp estimate fx) fy)]
+  (double (transduce identity goodness-of-fit data)))
+
+;; =&gt; 0.748
+</code></pre>
+</div>
+
+<aside class="notes">
+<ul>
+<li>R-square is 0.748,</li>
+<li>Explaining almost 3/4 of the variance in weight with height alone</li>
+<li>More accurate models will be able to explain more of the variance, more variablce</li>
+<li>Can no longer use simple linear regression</li>
+
+</ul>
+
+</aside>
+
+</section>
+</section>
+<section>
+<section id="slide-orgbefc748">
+<h2 id="orgbefc748"></h2>
+<p>
+\[{{\theta = (X^TX)^{-1}X^Ty}}\]
+</p>
+
+<div class="org-src-container">
+
+<pre><code class="clojure" >;; core.matrix includes
+(require '[clojure.core.matrix :refer [mmul transpose]]
+         '[clojure.core.matrix.linear :refer [solve]])
+
+(defn normal-equation [x y]
+  (let [xt  (transpose x)
+        xtx (mmul xt x)
+        xty (mmul xt y)]
+    (mmul (solve xtx) xty)))
+</code></pre>
+</div>
+
+<aside class="notes">
+<ul>
+<li>We can also implement a matrix version of the linear regression model</li>
+<li>It's called the normal equation, coefficients as a vector</li>
+<li>Implementation isn't bad using core.matrix</li>
+
+</ul>
+
+</aside>
+
+
+</section>
+</section>
+<section>
+<section id="slide-orgc154f23">
+<h2 id="orgc154f23"></h2>
+<div class="org-src-container">
+
+<pre><code class="clojure" >(defn features [&amp; fns]
+  (apply juxt fns))
+
+(def fx (features (constantly 1.0) :height))
+(def fy :weight)
+
+(let [coefs (normal-equation (map fx data) (map fy data))
+      estimate (fn [x] (mmul (transpose coefs) x))
+      goodness-of-fit (r-square (comp estimate fx) fy)]
+  (transduce identity goodness-of-fit data))
+
+;; 0.7480772104725628
+</code></pre>
+</div>
+
+<aside class="notes">
+<ul>
+<li>To use it we have to pull the features we want into a vector</li>
+<li>Including a bias value, which will calculate the offset when other values are zero</li>
+<li>R-square is the same. Using matrices we can add more predictors.</li>
+
+</ul>
+
+</aside>
+
+</section>
+</section>
+<section>
+<section id="slide-org2d25d9d">
+<h2 id="org2d25d9d"></h2>
+<div class="org-src-container">
+
+<pre><code class="clojure" >(defn dummy-mf [athlete]
+  (if (= (:sex athlete) "F") 0.0 1.0))
+
+(def fx (features (constantly 1.0) :height dummy-mf))
+(def fy :weight)
+
+(let [coefs (normal-equation (map fx data) (map fy data))
+      estimate (fn [x] (mmul (transpose coefs) x))
+      goodness-of-fit (r-square (comp estimate fx) fy)]
+  (double (transduce identity goodness-of-fit data)))
+
+;; 0.8022246027673994
+</code></pre>
+</div>
+
+<aside class="notes">
+<ul>
+<li>Add dummy-mf, dummy variable for sex.</li>
+<li>Improved our R-square to 80%</li>
+<li>Quick and flexible, but not scalable</li>
+<li>Inverting a matrix is slow and numerically unstable as data grows</li>
+
+</ul>
+
+</aside>
+
+</section>
+</section>
+<section>
+<section id="slide-orgc157b8f">
+<h2 id="orgc157b8f"></h2>
+<p>
+<i><b>“Either building, or contributing to, or forming a nice Clojure-first solution for deep learning would be huge”</b></i>
+</p>
+
+<p>
+<i>Eric Weinstein, Clojure for Machine Learning</i>
+</p>
+
+<aside class="notes">
+<p>
+Well, Eric. I completely agree.
+</p>
+
+</aside>
+
+</section>
+</section>
+<section>
+<section id="slide-org79e3baa">
+<h2 id="org79e3baa">Cortex</h2>
+<p>
+<a href="https://github.com/thinktopic/cortex">https://github.com/thinktopic/cortex</a>
+</p>
+
+<aside class="notes">
+<ul>
+<li>Developed by ThinkTopic in association with Mike Anderson</li>
+
+<li>Warning - alpha software, likely to change.</li>
+<li>It contains code for creating neural networks and other numeric optimisation</li>
+<li>Designed to express algorithms to be run on either CPU or GPU</li>
+
+</ul>
+
+</aside>
+
+</section>
+</section>
+<section>
+<section id="slide-org613e9df">
+<h2 id="org613e9df">Loss function</h2>
+
+<div class="figure">
+<p><img src="./assets/03_14.png" alt="03_14.png" />
+</p>
+</div>
+
+<aside class="notes">
+<ul>
+<li>We've been minimising the mean squared error with our regression models so far</li>
+
+</ul>
+
+</aside>
+
+</section>
+</section>
+<section>
+<section id="slide-org1d9210b">
+<h2 id="org1d9210b">Loss functions</h2>
+<ul>
+<li>MSE</li>
+<li>Cross Entropy</li>
+<li>Softmax</li>
+<li>Log Likelihood Softmax</li>
+
+</ul>
+
+<aside class="notes">
+<ul>
+<li>But Cortex implementats a variety of loss functions</li>
+<li>Useful in different contexts</li>
+
+</ul>
+
+</aside>
+
+</section>
+</section>
+<section>
+<section id="slide-org6a071e6">
+<h2 id="org6a071e6">Optimisation function</h2>
+
+<div class="figure">
+<p><img src="./assets/gradient-descent.png" alt="gradient-descent.png" />
+</p>
+</div>
+
+<aside class="notes">
+<ul>
+<li>General numeric optimisation for more complex models requires an iterative approach</li>
+<li>Start with a guess and improve upon it</li>
+<li>Adjust the parameters so that they minimise the loss function</li>
+
+</ul>
+
+</aside>
+
+</section>
+</section>
+<section>
+<section id="slide-orgd2fef21">
+<h2 id="orgd2fef21">Optimisation functions</h2>
+<ul>
+<li>Gradient descent</li>
+<li>Newton's method</li>
+<li>Adam</li>
+<li>Adadelta</li>
+
+</ul>
+
+<aside class="notes">
+<ul>
+<li>Cortex provides the following methods</li>
+<li>Different are appropriate depending on the shape of your data</li>
+<li>Important to normalise data if wildly different ranges</li>
+
+</ul>
+
+</aside>
+
+</section>
+</section>
+<section>
+<section id="slide-org0f8241b">
+<h2 id="org0f8241b"></h2>
+<div class="org-src-container">
+
+<pre><code class="clojure" >(def summary-stats
+  (fuse {:mean kixi/mean
+         :sd kixi/standard-deviation}))
+
+(defn normalizer [&amp; args]
+  (let [normalize (fn [x {:keys [mean sd]}]
+                    (/ (- x mean) sd))
+        summarise (fn [k] [k (pre-step summary-stats k)])]
+    (post-complete (fuse (into {} (map summarise) args))
+                   (fn [stats]
+                     (map #(merge-with normalize % stats))))))
+
+(def normalize
+  (transduce identity (normalizer :height :weight) data))
+
+(sequence (comp normalize (map fx)) data)
+
+;; ([1.0 -1.3898594098622594 0.0] [1.0 1.2798851553621058 1.0] ...)
+</code></pre>
+</div>
+
+<aside class="notes">
+<ul>
+<li>Lots of ways to normalize, let's subtract the mean and divide by standard deviation to get values mostly falling between -1 and 1.</li>
+<li>I've created a normalizing reducting function. Like r-square</li>
+<li>Reducing function returning a transducer! Why not</li>
+<li>Final line composes normalization with feature extractor</li>
+
+</ul>
+
+</aside>
+
+</section>
+</section>
+<section>
+<section id="slide-org6fe89e1">
+<h2 id="org6fe89e1"></h2>
+<div class="org-src-container">
+
+<pre><code class="clojure" >(def n-epochs 100)
+(def batch-size 1)
+
+(def loss
+  (opt/mse-loss))
+
+(def optimiser
+  (opt/newton-optimiser))
+</code></pre>
+</div>
+
+<aside class="notes">
+<ul>
+<li>Following slides are cleaner if we get a few defines out of the way</li>
+<li>Itertive approach: need n-epochs, number of loops over data</li>
+<li>Batch size, how often parameters are recomputed</li>
+
+</ul>
+
+</aside>
+
+</section>
+</section>
+<section>
+<section id="slide-org22d344e">
+<h2 id="org22d344e"></h2>
+<div class="org-src-container">
+
+<pre><code class="clojure" >(def fx (features :height dummy-mf))
+(def fy (features :weight))
+
+(let [xs (vec (sequence (comp normalize (map fx)) data))
+      ys (vec (sequence (comp normalize (map fy)) data))
+      network (layers/linear-layer 2 1)
+      trained (net/train network optimiser loss
+                         xs ys batch-size n-epochs)
+      predict (fn [x] (ffirst (net/run trained [x])))
+      goodness-of-fit (r-square (comp predict fx) (comp first fy))]
+  (transduce normalize goodness-of-fit data))
+
+;; 0.8021682807900807
+</code></pre>
+</div>
+
+<aside class="notes">
+<ul>
+<li>Put it all together</li>
+<li>Input &amp; output are vectors / Single layer</li>
+<li>Evaluate R-square, same!</li>
+<li>This is a regression model, we haven't stacked layers yet</li>
+
+</ul>
+
+</aside>
+
+</section>
+</section>
+<section>
+<section id="slide-org3347f06">
+<h2 id="org3347f06"></h2>
+
+<div class="figure">
+<p><img src="./assets/dream_b5f5fcb8cd.jpg" alt="dream_b5f5fcb8cd.jpg" />
+</p>
+</div>
+
+<aside class="notes">
+<ul>
+<li>You've probably heard about the amazing things that deep neural networks can do</li>
+<li>They'll be taking all of our jobs soon</li>
+<li>But before they can take our jobs, there's one task they'll need to master&#x2026;</li>
+
+</ul>
+
+</aside>
+
+</section>
+</section>
+<section>
+<section id="slide-org696a1ac">
+<h2 id="org696a1ac"></h2>
+
+<div class="figure">
+<p><img src="./assets/fizzbuzz.png" alt="fizzbuzz.png" />
+</p>
+</div>
+
+<aside class="notes">
+<ul>
+<li>Fizzbuzz.</li>
+<li>Final example will forget about swimmers, train a Fizzbuzz model</li>
+<li>Just to demonstrate how with only one hidden layer, get highly non-linear output</li>
+<li>I expect everyone knows the rules. If you don't you'll get the idea looking at the features</li>
+
+</ul>
+
+</aside>
+
+</section>
+</section>
+<section>
+<section id="slide-org968ff00">
+<h2 id="org968ff00"></h2>
+<div class="org-src-container">
+
+<pre><code class="clojure" >(defn fy [i]
+  (cond
+    (zero? (mod i 15)) [0.0 0.0 0.0 1.0]
+    (zero? (mod i 5))  [0.0 0.0 1.0 0.0]
+    (zero? (mod i 3))  [0.0 1.0 0.0 0.0]
+    :else              [1.0 0.0 0.0 0.0]))
+</code></pre>
+</div>
+
+<aside class="notes">
+<ul>
+<li>Teach the network fizzbuzz, encode whether fizzbuzz, fizz or buzz</li>
+<li>We're using so-called one-hot coding here.</li>
+<li>A lot like dummy coding, the one in the slot corresponding to the category we're after</li>
+
+</ul>
+
+</aside>
+
+</section>
+</section>
+<section>
+<section id="slide-org1272103">
+<h2 id="org1272103"></h2>
+<div class="org-src-container">
+
+<pre><code class="clojure" >(defn fx [i]
+  (map #(if (bit-test i %) 1.0 0.0) (range 10)))
+
+(encode 4)
+
+;; (0.0 0.0 1.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0)
+
+(encode 9)
+
+;; (1.0 0.0 0.0 1.0 0.0 0.0 0.0 0.0 0.0 0.0)
+</code></pre>
+</div>
+
+<aside class="notes">
+<ul>
+<li>Train on numbers 101 - 1000, but evaluate on numbers 1-100</li>
+<li>Our input needs to be something the neural network can generalise from</li>
+<li>Binary encoding works</li>
+<li>No simple relationship between input and output</li>
+
+</ul>
+
+</aside>
+
+</section>
+</section>
+<section>
+<section id="slide-org09722e3">
+<h2 id="org09722e3"></h2>
+
+<div class="figure">
+<p><img src="./assets/longley.png" alt="longley.png" />
+</p>
+</div>
+
+<aside class="notes">
+<ul>
+<li>A quick aside. Intutition for why neural networks are powerful.</li>
+<li>Even linear models can generate non-linear output with non-linear features of x</li>
+
+</ul>
+
+</aside>
+
+</section>
+</section>
+<section>
+<section id="slide-org25dd136">
+<h2 id="org25dd136"></h2>
+<p>
+\[{x_{feature} = [year, year^2, ... , year^{11}]}\]
+</p>
+
+<aside class="notes">
+<ul>
+<li>For example, powers of the lear all the way up to 11</li>
+
+</ul>
+
+</aside>
+
+</section>
+</section>
+<section>
+<section id="slide-org141ae5a">
+<h2 id="org141ae5a"></h2>
+
+<div class="figure">
+<p><img src="./assets/longley-fitted.png" alt="longley-fitted.png" />
+</p>
+</div>
+
+<aside class="notes">
+<ul>
+<li>We get a very non-linear output</li>
+<li>Linear relationship bewteen non-linear input</li>
+<li>In this particular case, we have over-fit.</li>
+
+</ul>
+
+</aside>
+
+</section>
+</section>
+<section>
+<section id="slide-org6cc6658">
+<h2 id="org6cc6658"></h2>
+
+<div class="figure">
+<p><img src="./assets/longley-prediction.png" alt="longley-prediction.png" />
+</p>
+</div>
+
+<aside class="notes">
+<ul>
+<li>The model isn't able to generalise well</li>
+<li>Less than 10 years later the model is predicting an enormous increase in the size of the military</li>
+<li>We'd want to include regularisation to penalise higher-order parameters</li>
+
+</ul>
+
+</aside>
+
+</section>
+</section>
+<section>
+<section id="slide-orge22f870">
+<h2 id="orge22f870"></h2>
+
+<div class="figure">
+<p><img src="./assets/nn.png" alt="nn.png" />
+</p>
+</div>
+
+<aside class="notes">
+<ul>
+<li>Neural networks are able to learn their own features</li>
+<li>But in order to do so, the network needs to be more than one layer deep</li>
+<li>Features it's learning reside in the hidden layers</li>
+
+</ul>
+
+</aside>
+
+</section>
+</section>
+<section>
+<section id="slide-orgf0ed519">
+<h2 id="orgf0ed519"></h2>
+<div class="org-src-container">
+
+<pre><code class="clojure" >(require '[cortex.nn.core :as core]
+         '[cortex.nn.layers :as layers])
+
+(defn create-network
+  []
+  (let [network-modules [(layers/linear-layer 10 100)
+                         (layers/logistic [100])
+                         (layers/linear-layer 100 4)
+    (core/stack-module network-modules)))
+</code></pre>
+</div>
+
+<aside class="notes">
+<ul>
+<li>Corex allows us to stack layers like this</li>
+<li>Wire each layer together, make sure dimensions match</li>
+<li>Input 10, output 4, hidden layer of 100 elements</li>
+<li>Train as before&#x2026;</li>
+
+</ul>
+
+</aside>
+
+</section>
+</section>
+<section>
+<section id="slide-org1562829">
+<h2 id="org1562829"></h2>
+
+<div class="figure">
+<p><img src="./assets/tea.jpg" alt="tea.jpg" />
+</p>
+</div>
+
+<aside class="notes">
+<ul>
+<li>Go away and make a cup of tea. Will take a few minutes without GPU</li>
+<li>We don't need to normalize anymore</li>
+<li>Note we're training a classifier (minor change to layers and dataset)</li>
+<li>We'll train the model in exacly the same way as before&#x2026; wait 10 minutes&#x2026;</li>
+
+</ul>
+
+</aside>
+
+</section>
+</section>
+<section>
+<section id="slide-orgeaf1f5c">
+<h2 id="orgeaf1f5c"></h2>
+<p>
+1 2 Fizz 4 Buzz Fizz 7 8 Fizz Buzz 11 Fizz 13 14 FizzBuzz 16 17 Fizz 19 Buzz Fizz 22 23 Fizz Buzz 26 Fizz 28 29 FizzBuzz 31 32 Fizz 34 Buzz Fizz 37 38 Fizz Buzz 41 Fizz 43 44 FizzBuzz 46 47 Fizz 49 Buzz Fizz 52 53 Fizz Buzz 56 Fizz 58 59 FizzBuzz 61 62 Fizz 64 Buzz Fizz 67 68 Fizz Buzz 71 Fizz 73 74 FizzBuzz 76 77 Fizz 79 Buzz Fizz 82 83 Fizz Buzz 86 Fizz 88 89 FizzBuzz 91 92 Fizz 94 Buzz Fizz 97 98 Fizz Buzz
+</p>
+
+<aside class="notes">
+<ul>
+<li>Success!</li>
+
+</ul>
+
+</aside>
+
+</section>
+</section>
+<section>
+<section id="slide-org1006c6a">
+<h2 id="org1006c6a">We're doomed</h2>
+
+<div class="figure">
+<p><img src="./assets/robots.jpg" alt="robots.jpg" />
+</p>
+</div>
+
+<aside class="notes">
+<ul>
+<li>We're doomed!</li>
+<li>And on that bombshell, I'll wrap things up</li>
+
+</ul>
+
+</aside>
+
+</section>
+</section>
+<section>
+<section id="slide-org3d8e4f4">
+<h2 id="org3d8e4f4">(A sample of) things I skipped</h2>
+<ul data-fragment-index="1" class="fragment appear">
+<li>Significance tests</li>
+<li><i>t</i>-distribution</li>
+<li>Classifier evaluators</li>
+<li>Cross-validation</li>
+<li>Recurrent NNs</li>
+<li>LSTM NNs</li>
+<li>&#x2026;</li>
+
+</ul>
+
+<aside class="notes">
+<ul>
+<li>This was a quick skip through a bunch of machine learning topics that interest me</li>
+<li>Haven't done more than whet your appetite</li>
+
+</ul>
+
+</aside>
+
+</section>
+</section>
+<section>
+<section id="slide-org700659a">
+<h2 id="org700659a">Further reading</h2>
+<ul>
+<li class="fragment appear"><a href="http://joelgrus.com/2016/05/23/fizz-buzz-in-tensorflow/">http://joelgrus.com/2016/05/23/fizz-buzz-in-tensorflow/</a>
+<ul>
+<li>Fizzbuzz in Tensorflow</li>
+
+</ul></li>
+<li class="fragment appear"><a href="http://github.com/thinktopic/cortex">http://github.com/thinktopic/cortex</a>
+<ul>
+<li>Examples of deeper neural networks</li>
+
+</ul></li>
+<li class="fragment appear"><a href="https://deeplearning4j.org/">https://deeplearning4j.org/</a>
+<ul>
+<li>Java Deep Learning</li>
+
+</ul></li>
+<li class="fragment appear"><a href="https://www.chrisstucchio.com/">https://www.chrisstucchio.com/</a>
+<ul>
+<li>Probability and statistics</li>
+
+</ul></li>
+<li class="fragment appear"><a href="http://www.wiki.cl.cam.ac.uk/rowiki/NaturalLanguage/ALTA">http://www.wiki.cl.cam.ac.uk/rowiki/NaturalLanguage/ALTA</a>
+<ul>
+<li>ALTA Institute</li>
+
+</ul></li>
+
+</ul>
+
+<aside class="notes">
+<ul>
+<li>ALTA research institute has published papers on technology behind W&amp;I</li>
+<li>Check out their website if you're interested</li>
+
+</ul>
+
+</aside>
+
+</section>
+</section>
+<section>
+<section id="slide-org3ab23e4">
+<h2 id="org3ab23e4">If you liked this&#x2026;</h2>
+<p>
+<a href="http://cljds.com/cljds-book">http://cljds.com/cljds-book</a> | 
+<a href="http://cljds.com/cljds-amzn">http://cljds.com/cljds-amzn</a>
+</p>
+
+
+<div class="figure">
+<p><img src="./assets/clojure-data-science.png" alt="clojure-data-science.png" />
+</p>
+</div>
+
+<p>
+<a href="https://github.com/clojuredatascience">https://github.com/clojuredatascience</a>
+</p>
+
+<aside class="notes">
+<ul>
+<li>If you liked this talk, you might also like the book</li>
+<li>If you didn't like this, you still might like</li>
+<li>Time for questions?</li>
+
+</ul>
+
+</aside>
+
+</section>
+</section>
+<section>
+<section id="slide-org87ac2e1">
+<h2 id="org87ac2e1">Thanks!</h2>
+<p>
+<a href="https://github.com/henrygarner/cljx-december-2016">https://github.com/henrygarner/cljx-december-2016</a>
+</p>
+
+
+<div class="figure">
+<p><img src="./assets/henrygarner.jpeg" alt="henrygarner.jpeg" />
+</p>
+</div>
+
+<p>
+Henry Garner
+</p>
+
+<p>
+@henrygarner
+</p>
+
+<aside class="notes">
+<ul>
+<li>Thank you very much indeed</li>
+
+</ul>
+
+</aside>
+</section>
+</section>
+</div>
+</div>
+<script src="./reveal.js/lib/js/head.min.js"></script>
+<script src="./reveal.js/js/reveal.js"></script>
+
+<script>
+// Full list of configuration options available here:
+// https://github.com/hakimel/reveal.js#configuration
+Reveal.initialize({
+
+controls: false,
+progress: false,
+history: true,
+center: true,
+slideNumber: false,
+rollingLinks: false,
+keyboard: true,
+overview: true,
+
+theme: Reveal.getQueryHash().theme, // available themes are in /css/theme
+transition: Reveal.getQueryHash().transition || 'none', // default/cube/page/concave/zoom/linear/fade/none
+transitionSpeed: 'default',
+multiplex: {
+    secret: '', // null if client
+    id: '', // id, obtained from socket.io server
+    url: '' // Location of socket.io server
+},
+
+// Optional libraries used to extend on reveal.js
+dependencies: [
+ { src: './reveal.js/plugin/highlight/highlight.js', async: true, callback: function() { hljs.initHighlightingOnLoad(); } },
+ { src: './reveal.js/plugin/notes/notes.js', async: true, condition: function() { return !!document.body.classList; } }]
+});
+</script>
+</body>
+</html>

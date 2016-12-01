@@ -1,0 +1,1321 @@
+#+Title: Clojure for Machine Learning
+#+Author: @henrygarner
+
+#+REVEAL_THEME: white
+#+REVEAL_EXTRA_CSS: ./extra.css
+#+REVEAL_MATHJAX_URL: MathJax/MathJax.js?config=TeX-AMS-MML_HTMLorMML
+#+OPTIONS: num:nil toc:nil reveal_mathjax:t reveal_history:t reveal_control:nil reveal_progress:nil reveal_center:true reveal_slide_number:nil reveal_title_slide:"<h1>%t</h1><p>%a</p>"
+#+REVEAL_TRANS: none
+#+REVEAL_PLUGINS: (highlight notes)
+
+#+BEGIN_NOTES
+Good afternoon Clojurians of London
+And Clojurians of the world, you're very welcome
+I'd like to thank the organisers for inviting me
+Thank you Chris for the introduction
+I should come clean ... should really be called
+#+END_NOTES
+
+* CLOJURE FOR STATISTICAL INFERENCE & PREDICTIVE ANALYTICS WITH TRANSDUCERS AND VISUALISATION TOO!
+
+#+BEGIN_NOTES
+- But this isn't as snappy
+#+END_NOTES
+
+* +CLOJURE FOR STATISTICAL INFERENCE & PREDICTIVE ANALYTICS WITH TRANSDUCERS AND VISUALISATION TOO!+
+
+
+#+BEGIN_NOTES
+- So we'll stick with Clojure for Machine Learning
+- Plus, I agree with Josh Wills:
+- Said at the ML conf SF a few months ago...
+#+END_NOTES
+
+* 
+
+/*“If you can convince an engineer they're doing machine learning, you can get them to do anything”*/
+
+/Josh Wills, Director of Engineering at Slack/
+
+#+BEGIN_NOTES
+- Even attend talk about STATISTICS!
+- If you haven't heard of Josh before, you might know something else he said:
+#+END_NOTES
+
+* 
+
+/*“Data Scientist (n.): Person who is better at statistics than any software engineer and better at software engineering than any statistician.”*/
+
+/Josh Wills, Director of Engineering at Slack/
+
+#+BEGIN_NOTES
+- I want to raise the mean statistical understanding in the room
+- As we work more and more with data it's an important professional skill
+#+END_NOTES
+
+* 
+
+[[./assets/polling-error.png]]
+
+#+BEGIN_NOTES
+- In fact, go further, important life skill
+- better prepared for the apparent voltaility in the world
+- It'll be stats and ML 101, so if you already know either
+#+END_NOTES
+
+* #sorrynotsorry
+
+#+BEGIN_NOTES
+- I'm really sorry
+- Hopefully you'll learn a little about visualisation and transducers too
+- If instead you find me going a little quickly (on GitHub)
+#+END_NOTES
+
+* Contents
+
+#+ATTR_REVEAL: :frag (appear appear appear) :frag_idx (1 2 3)
+- Bandit testing
+  #+ATTR_REVEAL: :frag (appear appear) :frag_idx (4 7)
+  - Inference & significance
+  - ~kixi.stats~
+- Regression models
+  #+ATTR_REVEAL: :frag (appear appear) :frag_idx (5 8)
+  - Goodness of fit
+  - ~redux~
+- Neural networks
+  #+ATTR_REVEAL: :frag (appear appear) :frag_idx (6 9)
+  - Feature learning
+  - ~cortex~
+
+#+BEGIN_NOTES
+- Will be 3 related sections to this talk
+- ... 3 themes
+- ... 3 primary libraries
+- Author of first 2, excited by the 3rd
+- First a little about my background and motivation for the talk
+#+END_NOTES
+
+* 
+:PROPERTIES:
+:reveal_background: ./assets/elit.png
+:END:
+
+#+BEGIN_NOTES
+- Freelance data scientist working in Clojure
+- Currently consulting with English Language iTutoring
+- Technology transfer business bringing NLP technology to market
+- Latest product is Write & Improve
+#+END_NOTES
+
+* 
+
+[[./assets/writeandimprove.svg]]
+
+http://writeandimprove.com
+
+#+BEGIN_NOTES
+- Allows EFL larners to improve their written English
+- Launched a few months ago
+- Check it out. Free and don't need account
+- Also hiring. Bristol. No stats.
+#+END_NOTES
+
+* 
+
+[[./assets/wandi-feedback.png]]
+
+#+BEGIN_NOTES
+- Learner arrives at site. Can select a prompt and fill out a written response.
+- Enter text in response to prompt. Feedback in 10-15s
+#+END_NOTES
+
+* 
+
+[[./assets/wandi-correction.png]]
+
+#+BEGIN_NOTES
+- Feedback:
+  - misplaced, misspelled words
+  - grammatical errors
+- Learner considers, resubmits, iterates
+#+END_NOTES
+
+* 
+
+[[./assets/refresh.png]]
+
+#+BEGIN_NOTES
+- Backend is a perceptron-based model trained on annotated scripts
+- Each new submission is also annotated by humans
+- Virtuous cycle
+- Wanted to adopt same iterative improvement to site design
+- For example, how to present feedback for best learner results
+#+END_NOTES
+
+* 
+
+[[./assets/conversion-rates.png]]
+
+#+BEGIN_NOTES
+- Typical A/B tests split users into two or more groups
+- Trial each variation and measure conversion rate
+- Each trial is a series of tests with a binary outcome
+- (it's called a Bernoulli trial)
+#+END_NOTES
+
+* 
+
+#+ATTR_REVEAL: :frag (appear appear appear appear) :frag_idx (1 2 3 4)
+- H H T H T
+- T H H H T
+- H H H H H
+- H H H H H H H H H H H H H H H
+
+#+BEGIN_NOTES
+- Coin flips are a Bernoulli trial
+- Say we flip a coin 5 times, you'd expect some uncertainty in the results
+- Not impossible we'd get all heads
+- Probability diminishes the more trials you run
+#+END_NOTES
+
+* 
+
+♥️
+
+Reagent
+#+ATTR_REVEAL: :frag appear :frag_idx 1
+/interactive UIs/
+
+thi.ng/geom-viz
+#+ATTR_REVEAL: :frag appear :frag_idx 1
+/SVG graphs/
+
+jStat
+#+ATTR_REVEAL: :frag appear :frag_idx 1
+/JavaScript distributions/
+
+#+BEGIN_NOTES
+- Fan of Bret Victor, learnable programming
+- Learning any technical skill is enhanced by immediate feedback
+- I use these libraries for interactive visualisations
+- Won't explain code, available on GitHub
+#+END_NOTES
+
+* 
+
+#+REVEAL_HTML: <iframe src="./cljx/resources/public/simulation.html" width="600" height="400"></iframe>
+
+Distribution over /k/
+
+#+BEGIN_NOTES
+- For a fair coin, we'd expect heads 50% of the time
+- Simulation shows for a given n and p, disibution over k, number of heads
+- Looks normal, but it's discrete (you can't throw 1.5 heads), it's actually binomial
+#+END_NOTES
+
+* 
+
+#+REVEAL_HTML: <iframe src="./cljx/resources/public/binomial.html" width="800" height="400"></iframe>
+
+Distribution over /k/
+
+#+BEGIN_NOTES
+- Visualise binomial distribution
+- We can adjust the n and p parameters see how the distribution over k varies
+- Skewed extremes, because k can't be less than 0 or exceed 1
+#+END_NOTES
+
+* 
+
+[[./assets/probability-distributions.png]]
+
+#+BEGIN_NOTES
+- What we usually want to do in analytics is work backwards from what we can see to what we can't
+- Observations to potential causes (Statistical inference)
+- Turns out given n and k, distribution of p is given by beta distribution
+- Simulate...
+#+END_NOTES
+
+* 
+
+#+REVEAL_HTML: <iframe src="./cljx/resources/public/index.html" width="800" height="400"></iframe>
+
+Distribution over /p/
+
+#+BEGIN_NOTES
+- Now we control only the things we observe, n and k.
+- More data gives more certainty that the value lies at a particular spot.
+- It's a model of our confidence in the true conversion rate, based on our sample
+#+END_NOTES
+
+* 
+
+[[./assets/diff-beta.png]]
+
+#+BEGIN_NOTES
+- Useful because we can compare
+- One of these conversion rates looks much better than the other
+#+END_NOTES
+
+
+* 
+
+[[./assets/similar-beta.png]]
+
+#+BEGIN_NOTES
+- Whereas these could be the same, different due to chance measurement error
+- There's a precise way to formulate what I just said mathematically
+- That's the intuition
+#+END_NOTES
+
+* 
+
+[[./assets/more-data.png]]
+
+#+BEGIN_NOTES
+- Proportional difference is the same
+- More data allows us to be more cetain that the two distributions represent different conversion rates
+- Statistical power: ability to detect a difference where there is one
+#+END_NOTES
+
+* 
+
+#+REVEAL_HTML: <video controls><source data-src="./assets/bandit_coins.mov"/></video>
+
+#+BEGIN_NOTES
+- Everything I have shown you applies to A/B tests
+- Principle behind a bandit test, prioritise the best-performing variation
+- Simulation dynamically allocates resources to a variation in proportion to probability that it is the best
+- Poorer-performing variation is given a fair chance, but most learners see better one
+#+END_NOTES
+
+* 
+
+#+BEGIN_SRC clojure
+(def trials
+  {:trial-1 {:n 10 :k 5}
+   :trial-2 {:n 20 :k 10}}
+
+(defn bayes-bandit
+  [trials]
+  (let [score (fn [{:keys [n k]}]
+                (sample-beta 1 :alpha (inc k) :beta (inc (- n k))))]
+    (key (apply max-key (comp score val) trials))))
+#+END_SRC
+
+#+BEGIN_NOTES
+- Given two trials with observed n and k
+- Sample a value from each beta distribution with given parameters, pick the winner
+- Sample will tend to be better for the better variation, in proportion to how much better it is
+- Will sometimes be worse, so we can continue to explore other variations
+- Thompson sampling
+#+END_NOTES
+
+* 
+
+[[./assets/cassidy.png]]
+
+#+BEGIN_NOTES
+- For W&I we abstract all of this out into a Clojure service
+- Because although is a couple of lines of code, statistical validity requires a bit more work
+#+END_NOTES
+
+* Beware
+
+#+ATTR_REVEAL: :frag (appear appear appear appear) :frag_idx (1 2 3 4)
+- Ensure trials are independent
+  - Test users, not visits
+- Has the variation been seen?
+  - /Assigned/ variations may not be /active/ variations
+- Don't call too early
+  - Conversion may take a day or longer. Wait and see.
+- Not a panacea
+  - A sensible prior will stabilise early fluctuations
+
+#+BEGIN_NOTES
+- Prior is our expectation before we've gathered any evidence
+- We don't want it to outweigh evidence, so prior is balanced
+- Paraphrase XKCD. Test 1% error that sun has just exploded.
+- We choose a prior that's based on our average conversion rate
+#+END_NOTES
+
+* 
+
+#+BEGIN_SRC clojure
+(def trials
+  {:trial-1 {:n 10 :k 5}
+   :trial-2 {:n 20 :k 10}}
+
+(defn bayes-bandit
+  [trials]
+  (let [score (fn [{:keys [n k]}]
+                (sample-beta 1 :alpha (inc (+ k 10))
+                               :beta  (inc (+ (- n k) 40))))]
+    (key (apply max-key (comp score val) trials))))
+#+END_SRC
+
+#+BEGIN_NOTES
+- If conversion rate was 20%, we'd add 10 to our alpha and 40 to our beta.
+- This means that the evidence starts to outweight prior once we've run 50 tests
+- Want to talk about confidence in machine learning
+#+END_NOTES
+
+* 
+
+[[./assets/clojurex2015.jpg]]
+
+#+BEGIN_NOTES
+- I presented last year about expressive parallel analytics with Clojure's transducers
+- Pause whilst the photographer gets the beginnings of an infinite regress
+#+END_NOTES
+* 
+
+#+BEGIN_SRC clojure
+(transduce (map inc) + (range 10))
+#+END_SRC
+
+#+BEGIN_NOTES
+- What excited me about transducers was not the transducers themselves
+- But the reducing functions, because with transducers they get a lifecycle
+#+END_NOTES
+
+* 
+
+#+ATTR_REVEAL: :frag (appear appear appear) :frag_idx (1 2 3)
+- Init
+- Step
+- Complete
+
+#+ATTR_REVEAL: :frag (appear) :frag_idx (4)
+#+BEGIN_SRC clojure
+(fn +'
+  ([] 0)       ;; init
+  ([acc x]
+    (+ acc x)) ;; step
+  ([acc] acc)) ;; complete
+#+END_SRC
+
+#+BEGIN_NOTES
+- Lifecycle consists of three phases
+- Since I gave that talk I've released a library called
+#+END_NOTES
+
+* 
+
+[[./assets/kixi.png]]
+
+KIXI.STATS
+
+https://github.com/mastodonc/kixi.stats
+
+#+ATTR_REVEAL: :frag appear) :frag_idx 1
+- Mean
+- Variance
+- Standard deviation
+- Covariance
+- Correlation
+- Simple linear regression
+
+#+BEGIN_NOTES
+- Contains most of the popular sequence stats
+- And lesser-used, like skewness and kurtosis
+#+END_NOTES
+
+* "Awkward-sized data"
+
+[[./assets/bruce.jpg]]
+
+
+#+BEGIN_NOTES
+- Designed for awkward-sized data
+- Too small for Spark, but large enough to be work optimising
+- All functions operate in only a single pass over the data
+#+END_NOTES
+
+* 
+
+https://www.theguardian.com/sport/datablog/2012/aug/07/olympics-2012-athletes-age-weight-height
+
+#+BEGIN_SRC clojure
+{:sport "Swimming",
+ :age 27,
+ :sex "M",
+ :birth-place "Towson (USA)",
+ :name "Michael Phelps",
+ :bronze 0,
+ :birth-date "6/30/1985",
+ :gold 2,
+ :weight 88,
+ :silver 2,
+ :height 193}
+#+END_SRC
+
+#+BEGIN_NOTES
+- Sourced some awkward sized data from the Guardian
+- Attributes of athletes from 2012 games, height weight etc
+#+END_NOTES
+
+* 
+
+[[./assets/height-histogram.png]]
+
+#+BEGIN_NOTES
+- I'm sure we all know that heights are normally distributed
+- Normal distribution is parameterised by two values:
+  - Mean
+  - Standard deviation
+- We can calculate these using Kixi.stats like this:
+#+END_NOTES
+
+* 
+
+#+BEGIN_SRC clojure
+(require '[kixi.stats.core :as kixi])
+
+(->> (data-source "athletes.txt")
+     (transduce (map :height) kixi/mean))
+
+;; => 1603855/9038
+
+(->> (data-source "athletes.txt")
+     (transduce (map :height) kixi/standard-deviation))
+
+;; => 11.202506235734145
+#+END_SRC
+
+#+BEGIN_NOTES
+- We transduce over the athletes mapping the heights
+- Passing the relevant reducing function
+- Cal also calculate more intricate output...
+#+END_NOTES
+
+* 
+
+#+BEGIN_SRC clojure
+(require '[kixi.stats.core :as kixi])
+
+(def rf
+  (kixi/correlation-matrix {:height :height
+                            :weight :weight
+                            :age :age}))
+
+(->> (data-source "athletes.txt")
+     (transduce identity rf))
+
+;; {[:height :weight] 0.7602753595140576,
+;;  [:height :age]    0.0835619870171009,
+;;  [:weight :height] 0.7602753595140576,
+;;  [:weight :age]    0.1263794369985025,
+;;  [:age :height]    0.0835619870171009,
+;;  [:age :weight]    0.1263794369985025}
+#+END_SRC
+
+#+BEGIN_NOTES
+- Such as correlation matrix
+- Correlation for each pair of values
+#+END_NOTES
+
+* 
+
+#+BEGIN_SRC clojure
+(require '[kixi.stats.core :as kixi])
+
+(def rf
+  (kixi/correlation-matrix {:height :height
+                            :weight :weight
+                            :age :age}))
+
+(->> (data-source "athletes.txt")
+     (transduce (filter swimmer?) rf))
+
+;; {[:height :weight] 0.8649145683086642,
+;;  [:height :age]    0.3011551185677323,
+;;  [:weight :height] 0.8649145683086642,
+;;  [:weight :age]    0.32150444584208426,
+;;  [:age :height]    0.3011551185677323,
+;;  [:age :weight]    0.32150444584208426}
+#+END_SRC
+
+#+BEGIN_NOTES
+- Filter to just swimmers, correlation goes up
+- There's a clearer relationship filter to just particular body type
+#+END_NOTES
+
+* 
+
+[[./assets/scatter-correlation.png]]
+
+#+BEGIN_NOTES
+- Plotting correlation on a scatter plot in GorillaREPL clearly shows the relationship
+- Note correlation isn't the slope of the line
+- Single measure of how close to being a straight line it is
+#+END_NOTES
+
+* 
+
+$${y = ax + b}$$
+
+#+BEGIN_NOTES
+- To plot an actual line, you need two parameters
+- Slope a and offset b
+- Linear equation
+#+END_NOTES
+
+* 
+
+[[./assets/7180OS-03-200.png]]
+
+#+BEGIN_NOTES
+- Here's a plot for the precise relationship between two temperature scales
+- It's exact, no scatter. Correlation is 1.0
+#+END_NOTES
+
+* 
+
+$${Fahrenheit = 1.8 * Centigrade + 32}$$
+
+#+BEGIN_NOTES
+- However the a and b, parameters to linear model are 1.8 and 32.
+- We can calculate line of best fit for our swimmers too
+#+END_NOTES
+ 
+* 
+#+BEGIN_SRC clojure
+(require '[kixi.stats.core :as kixi])
+
+(def rf
+  (kixi/simple-linear-regression :height :weight))
+
+(->> (data-source "athletes.txt")
+     (transduce (filter swimmer?) rf))
+
+;; [-1286496024/11650283 11809306/11650283]
+#+END_SRC
+
+#+BEGIN_NOTES
+- Using the simple-linear-regression reducing function
+- return the parameters to the model, a and b
+#+END_NOTES
+
+* 
+
+[[./assets/swimmer-regression.png]]
+
+#+BEGIN_NOTES
+- Plot line looks like the best fit for the data
+- We can use this line to predict the weight for an olympic swimmer given the height
+- Don't want to evaluate on the same data trained on. Want another olympian
+#+END_NOTES
+
+* 
+
+[[./assets/mark-spitz.jpg]]
+
+#+BEGIN_NOTES
+- Mark Spitz was the Michael Phelps of his day
+- Racking up an impressive 7 gold medals in the 1972 Olympics
+#+END_NOTES
+
+* 
+
+[[./assets/mark-spitz-wikipedia.png]]
+
+#+BEGIN_NOTES
+- Look up his height and weight Wikipedia: 183cm and 73kg.
+- Should we plug that weight into the equation? NO!
+- Those numbers are recent, and Mark hasn't competed at Olympic standard for 30 years
+- In other words, not part of the population we've trained on
+#+END_NOTES
+
+* 
+
+[[./assets/literary-digest-poll.png]]
+
+#+BEGIN_NOTES
+- Sample bias
+- Infamous 1936 Presidential election poll, Literary digest sampled 10 million
+- Largest poll ever recorded. Scoured magazine subscriptions, telephone directories
+- Confidently predicted a win for Landon.
+#+END_NOTES
+
+* 
+
+[[./assets/literary-digest-red.jpg]]
+
+#+BEGIN_NOTES
+- In the envent Roosevelt won by a large margin
+- Favoured middle and upper-class voters
+- This same problem occurs with W&I: Shakespeare / fluent English
+- An accurate small sample is much better than an inaccurate large one
+#+END_NOTES
+
+* 
+
+http://www.topendsports.com/athletes/swimming/spitz-mark.htm
+
+#+BEGIN_SRC clojure
+(def fy :weight)
+(def fx :height)
+(def regression
+  (stats/simple-linear-regression fx fy))
+
+(def data (filter swimmer? (data-source "athletes")))
+
+(let [[b a] (transduce identity regression data)
+      predict (fn [x]
+                (double (+ (* a x) b)))]
+  (predict 185))
+
+;; 77.09903579166274
+#+END_SRC
+
+#+BEGIN_NOTES
+- So we can find Mark's competition height on the topendsports website
+- 185 cm
+- Predicts a weight of 77kg, vs competition weight of 79kg
+
+- Like any model, our model has some error associated with it
+- Comes from two places...
+#+END_NOTES
+
+* 
+
+[[./assets/03_18.png]]
+
+#+BEGIN_NOTES
+- There's an error around the line of best fit, based on the sample
+- Also variance of individual data points around the line of best fit
+- Two errors compound
+- We've reported prediction, should report error too
+#+END_NOTES
+
+* 
+
+#+BEGIN_SRC clojure
+
+(def fy :weight)
+(def fx :height)
+
+(def estimate-error
+  (stats/standard-error-prediction fx fy 185))
+
+(def data (filter swimmer? (data-source "athletes")))
+
+(let [[b a] (transduce identity regression data)
+      std-e (transduce identity estimate-error data)
+      confidence-interval (fn [x]
+                            (let [estimate (double (+ (* a x) b))]
+                              [(- estimate (* std-e 1.94))
+                               (+ estimate (* std-e 1.94))]))]
+  (confidence-interval 185))
+
+;; [65.97046903896646 88.22760254435903]
+#+END_SRC
+
+#+BEGIN_NOTES
+- kixi.stats contains standard-error-prediction
+- From the standard error can calculate confidence intervals
+- e.g.(fuzzy) about 95% of points within 1.94 s.e. prediction
+- Have to include height in our s.e. calc because:
+#+END_NOTES
+
+* 
+
+[[./assets/03_19.png]]
+
+#+BEGIN_NOTES
+- The error bars are actually flared
+- More apparent with less data
+#+END_NOTES
+
+
+* [69.97 ≤ 79 ≤ 88.22]
+
+#+BEGIN_NOTES
+- Anyway our model has done a pretty good job
+#+END_NOTES
+
+* [69.97 ≤ 79 ≤ 88.22]
+
+ ✅
+#+BEGIN_NOTES
+- But it's quite a wide interval
+- Reason is that model isn't accounting for all the variance in weight
+#+END_NOTES
+
+* 
+
+[[./assets/03_14_a.png]]
+
+#+BEGIN_NOTES
+- Without a model, if I asked you to guess weight given height
+- Guess mean (y-bar)
+- Average error is going to be MSE from the mean (avg size of square)
+#+END_NOTES
+
+* 
+
+
+[[./assets/03_14_b.png]]
+
+#+BEGIN_NOTES
+- If you go to the trouble of creating a linear model, you'll predict f
+- Now average error is mean squared error of the residuals
+- The ratio of these two errors is variance unexplained
+- The complement is the explained, called r-square
+- Introduce another library to calculate
+#+END_NOTES
+
+* redux
+
+https://github.com/henrygarner/redux
+
+#+ATTR_REVEAL: :frag (appear appear appear appear appear) :frag_idx (2 3 4 5 6)
+- ~pre-step~
+- ~post-complete~
+- ~fuse~
+- + more!
+
+#+BEGIN_NOTES
+- A library of reducing function combinators
+- pre-step associates a function to call before each step
+- post-complete associates a function to be called at the end of the reduction
+- fuse will compute the results of several rfs in parallel
+#+END_NOTES
+
+* 
+
+#+BEGIN_SRC clojure
+(def rf
+  (fuse {:mean kixi/mean
+         :sd kixi/standard-deviation}))
+
+(transduce (map :height) rf (data-source "athletes.txt"))
+
+;; => {:mean 1603855/9038, :sd 11.202506235734145}
+#+END_SRC
+
+#+BEGIN_NOTES
+- Can calculate mean and sd in a single pass
+- Let's use redux to calculate the R-square
+#+END_NOTES
+
+* R-square
+
+$${{R^2 = 1 - \frac{var(e)}{var(Y)}}}$$
+
+#+BEGIN_NOTES
+- here's the equation
+- mentioned is the complement of the variance left unexplained by the model
+- Build up the function in a few steps
+#+END_NOTES
+
+* R-square
+
+#+BEGIN_SRC clojure
+(defn residual [fy-hat fy]
+  #(- (fy-hat %) (fy %)))
+
+(defn r-square [fy-hat fy]
+ 
+                  (pre-step variance (residual fy-hat fy))
+                  (pre-step variance fy)
+
+                             )
+#+END_SRC
+
+#+BEGIN_NOTES
+- Define a function for calculating the residual error of the model
+- Apply it as a pre-step, so you're calculating the variance of that
+- And the variance of the ys
+#+END_NOTES
+
+* R-square
+
+#+BEGIN_SRC clojure
+(defn residual [fy-hat fy]
+  #(- (fy-hat %) (fy %)))
+
+(defn r-square [fy-hat fy]
+ 
+    (fuse {:var-e (pre-step variance (residual fy-hat fy))
+           :var-y (pre-step variance fy)})
+
+                             )
+#+END_SRC
+
+#+BEGIN_NOTES
+- name the calculations and fuse them together
+- so you're calculating both in a single pass
+#+END_NOTES
+
+* R-square
+
+#+BEGIN_SRC clojure
+(defn residual [fy-hat fy]
+  #(- (fy-hat %) (fy %)))
+
+(defn r-square [fy-hat fy]
+  (post-complete
+    (fuse {:var-e (pre-step variance (residual fy-hat fy))
+           :var-y (pre-step variance fy)})
+    (fn [{:keys [var-e var-y]}]
+      (- 1 (/ var-e var-y)))))
+#+END_SRC
+
+#+BEGIN_NOTES
+- Add a post-complete step, to transform the map of two variances
+- into the r-square. We're done!
+#+END_NOTES
+
+* R-square
+
+#+BEGIN_SRC clojure
+(def fy :weight)
+(def fx :height)
+(def regression (kixi/simple-linear-regression fx fy))
+(def data (filter swimmer? (data-source "athletes")))
+
+(let [[b a] (transduce identity regression data)
+      estimate (fn [x] (+ (* a x) b))
+      goodness-of-fit (r-square (comp estimate fx) fy)]
+  (double (transduce identity goodness-of-fit data)))
+
+;; => 0.748
+#+END_SRC
+
+#+BEGIN_NOTES
+- R-square is 0.748,
+- Explaining almost 3/4 of the variance in weight with height alone
+- More accurate models will be able to explain more of the variance, more variablce
+- Can no longer use simple linear regression
+#+END_NOTES
+
+* 
+
+$${{\theta = (X^TX)^{-1}X^Ty}}$$
+
+#+BEGIN_SRC clojure
+;; core.matrix includes
+(require '[clojure.core.matrix :refer [mmul transpose]]
+         '[clojure.core.matrix.linear :refer [solve]])
+
+(defn normal-equation [x y]
+  (let [xt  (transpose x)
+        xtx (mmul xt x)
+        xty (mmul xt y)]
+    (mmul (solve xtx) xty)))
+#+END_SRC
+
+#+BEGIN_NOTES
+- We can also implement a matrix version of the linear regression model
+- It's called the normal equation, coefficients as a vector
+- Implementation isn't bad using core.matrix
+#+END_NOTES
+
+
+* 
+
+#+BEGIN_SRC clojure
+(defn features [& fns]
+  (apply juxt fns))
+
+(def fx (features (constantly 1.0) :height))
+(def fy :weight)
+
+(let [coefs (normal-equation (map fx data) (map fy data))
+      estimate (fn [x] (mmul (transpose coefs) x))
+      goodness-of-fit (r-square (comp estimate fx) fy)]
+  (transduce identity goodness-of-fit data))
+
+;; 0.7480772104725628
+#+END_SRC
+
+#+BEGIN_NOTES
+- To use it we have to pull the features we want into a vector
+- Including a bias value, which will calculate the offset when other values are zero
+- R-square is the same. Using matrices we can add more predictors.
+#+END_NOTES
+
+* 
+
+#+BEGIN_SRC clojure
+(defn dummy-mf [athlete]
+  (if (= (:sex athlete) "F") 0.0 1.0))
+
+(def fx (features (constantly 1.0) :height dummy-mf))
+(def fy :weight)
+
+(let [coefs (normal-equation (map fx data) (map fy data))
+      estimate (fn [x] (mmul (transpose coefs) x))
+      goodness-of-fit (r-square (comp estimate fx) fy)]
+  (double (transduce identity goodness-of-fit data)))
+
+;; 0.8022246027673994
+#+END_SRC
+
+#+BEGIN_NOTES
+- Add dummy-mf, dummy variable for sex.
+- Improved our R-square to 80%
+- Quick and flexible, but not scalable
+- Inverting a matrix is slow and numerically unstable as data grows
+#+END_NOTES
+
+* 
+
+/*“Either building, or contributing to, or forming a nice Clojure-first solution for deep learning would be huge”*/
+
+/Eric Weinstein, Clojure for Machine Learning/
+
+#+BEGIN_NOTES
+Well, Eric. I completely agree.
+#+END_NOTES
+
+* Cortex
+
+https://github.com/thinktopic/cortex
+
+#+BEGIN_NOTES
+- Developed by ThinkTopic in association with Mike Anderson
+
+- Warning - alpha software, likely to change.
+- It contains code for creating neural networks and other numeric optimisation
+- Designed to express algorithms to be run on either CPU or GPU
+#+END_NOTES
+
+* Loss function
+
+[[./assets/03_14.png]]
+
+#+BEGIN_NOTES
+- We've been minimising the mean squared error with our regression models so far
+#+END_NOTES
+
+* Loss functions
+
+- MSE
+- Cross Entropy
+- Softmax
+- Log Likelihood Softmax
+
+#+BEGIN_NOTES
+- But Cortex implementats a variety of loss functions
+- Useful in different contexts
+#+END_NOTES
+
+* Optimisation function
+
+[[./assets/gradient-descent.png]]
+
+#+BEGIN_NOTES
+- General numeric optimisation for more complex models requires an iterative approach
+- Start with a guess and improve upon it
+- Adjust the parameters so that they minimise the loss function
+#+END_NOTES
+
+* Optimisation functions
+
+- Gradient descent
+- Newton's method
+- Adam
+- Adadelta
+
+#+BEGIN_NOTES
+- Cortex provides the following methods
+- Different are appropriate depending on the shape of your data
+- Important to normalise data if wildly different ranges
+#+END_NOTES
+
+* 
+
+#+BEGIN_SRC clojure
+(def summary-stats
+  (fuse {:mean kixi/mean
+         :sd kixi/standard-deviation}))
+
+(defn normalizer [& args]
+  (let [normalize (fn [x {:keys [mean sd]}]
+                    (/ (- x mean) sd))
+        summarise (fn [k] [k (pre-step summary-stats k)])]
+    (post-complete (fuse (into {} (map summarise) args))
+                   (fn [stats]
+                     (map #(merge-with normalize % stats))))))
+
+(def normalize
+  (transduce identity (normalizer :height :weight) data))
+
+(sequence (comp normalize (map fx)) data)
+
+;; ([1.0 -1.3898594098622594 0.0] [1.0 1.2798851553621058 1.0] ...)
+#+END_SRC
+
+#+BEGIN_NOTES
+- Lots of ways to normalize, let's subtract the mean and divide by standard deviation to get values mostly falling between -1 and 1.
+- I've created a normalizing reducting function. Like r-square
+- Reducing function returning a transducer! Why not
+- Final line composes normalization with feature extractor
+#+END_NOTES
+
+* 
+
+#+BEGIN_SRC clojure
+(def n-epochs 100)
+(def batch-size 1)
+
+(def loss
+  (opt/mse-loss))
+
+(def optimiser
+  (opt/newton-optimiser))
+#+END_SRC
+
+#+BEGIN_NOTES
+- Following slides are cleaner if we get a few defines out of the way
+- Itertive approach: need n-epochs, number of loops over data
+- Batch size, how often parameters are recomputed
+#+END_NOTES
+
+* 
+
+#+BEGIN_SRC clojure
+(def fx (features :height dummy-mf))
+(def fy (features :weight))
+
+(let [xs (vec (sequence (comp normalize (map fx)) data))
+      ys (vec (sequence (comp normalize (map fy)) data))
+      network (layers/linear-layer 2 1)
+      trained (net/train network optimiser loss
+                         xs ys batch-size n-epochs)
+      predict (fn [x] (ffirst (net/run trained [x])))
+      goodness-of-fit (r-square (comp predict fx) (comp first fy))]
+  (transduce normalize goodness-of-fit data))
+
+;; 0.8021682807900807
+#+END_SRC
+
+#+BEGIN_NOTES
+- Put it all together
+- Input & output are vectors / Single layer
+- Evaluate R-square, same!
+- This is a regression model, we haven't stacked layers yet
+#+END_NOTES
+
+* 
+
+[[./assets/dream_b5f5fcb8cd.jpg]]
+
+#+BEGIN_NOTES
+- You've probably heard about the amazing things that deep neural networks can do
+- They'll be taking all of our jobs soon
+- But before they can take our jobs, there's one task they'll need to master...
+#+END_NOTES
+
+* 
+
+[[./assets/fizzbuzz.png]]
+
+#+BEGIN_NOTES
+- Fizzbuzz.
+- Final example will forget about swimmers, train a Fizzbuzz model
+- Just to demonstrate how with only one hidden layer, get highly non-linear output
+- I expect everyone knows the rules. If you don't you'll get the idea looking at the features
+#+END_NOTES
+
+* 
+
+#+BEGIN_SRC clojure
+(defn fy [i]
+  (cond
+    (zero? (mod i 15)) [0.0 0.0 0.0 1.0]
+    (zero? (mod i 5))  [0.0 0.0 1.0 0.0]
+    (zero? (mod i 3))  [0.0 1.0 0.0 0.0]
+    :else              [1.0 0.0 0.0 0.0]))
+#+END_SRC
+
+#+BEGIN_NOTES
+- Teach the network fizzbuzz, encode whether fizzbuzz, fizz or buzz
+- We're using so-called one-hot coding here.
+- A lot like dummy coding, the one in the slot corresponding to the category we're after
+#+END_NOTES
+
+* 
+
+#+BEGIN_SRC clojure
+(defn fx [i]
+  (map #(if (bit-test i %) 1.0 0.0) (range 10)))
+
+(encode 4)
+
+;; (0.0 0.0 1.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0)
+
+(encode 9)
+
+;; (1.0 0.0 0.0 1.0 0.0 0.0 0.0 0.0 0.0 0.0)
+#+END_SRC
+
+#+BEGIN_NOTES
+- Train on numbers 101 - 1000, but evaluate on numbers 1-100
+- Our input needs to be something the neural network can generalise from
+- Binary encoding works
+- No simple relationship between input and output
+#+END_NOTES
+
+* 
+
+[[./assets/longley.png]]
+
+#+BEGIN_NOTES
+- A quick aside. Intutition for why neural networks are powerful.
+- Even linear models can generate non-linear output with non-linear features of x
+#+END_NOTES
+
+* 
+
+$${x_{feature} = [year, year^2, ... , year^{11}]}$$
+
+#+BEGIN_NOTES
+- For example, powers of the lear all the way up to 11
+#+END_NOTES
+
+* 
+
+[[./assets/longley-fitted.png]]
+
+#+BEGIN_NOTES
+- We get a very non-linear output
+- Linear relationship bewteen non-linear input
+- In this particular case, we have over-fit.
+#+END_NOTES
+
+* 
+
+[[./assets/longley-prediction.png]]
+
+#+BEGIN_NOTES
+- The model isn't able to generalise well
+- Less than 10 years later the model is predicting an enormous increase in the size of the military
+- We'd want to include regularisation to penalise higher-order parameters
+#+END_NOTES
+
+* 
+
+[[./assets/nn.png]]
+
+#+BEGIN_NOTES
+- Neural networks are able to learn their own features
+- But in order to do so, the network needs to be more than one layer deep
+- Features it's learning reside in the hidden layers
+#+END_NOTES
+
+* 
+
+#+BEGIN_SRC clojure
+(require '[cortex.nn.core :as core]
+         '[cortex.nn.layers :as layers])
+
+(defn create-network
+  []
+  (let [network-modules [(layers/linear-layer 10 100)
+                         (layers/logistic [100])
+                         (layers/linear-layer 100 4)
+    (core/stack-module network-modules)))
+#+END_SRC
+
+#+BEGIN_NOTES
+- Corex allows us to stack layers like this
+- Wire each layer together, make sure dimensions match
+- Input 10, output 4, hidden layer of 100 elements
+- Train as before...
+#+END_NOTES
+
+* 
+
+[[./assets/tea.jpg]]
+
+#+BEGIN_NOTES
+- Go away and make a cup of tea. Will take a few minutes without GPU
+- We don't need to normalize anymore
+- Note we're training a classifier (minor change to layers and dataset)
+- We'll train the model in exacly the same way as before... wait 10 minutes...
+#+END_NOTES
+
+* 
+
+1 2 Fizz 4 Buzz Fizz 7 8 Fizz Buzz 11 Fizz 13 14 FizzBuzz 16 17 Fizz 19 Buzz Fizz 22 23 Fizz Buzz 26 Fizz 28 29 FizzBuzz 31 32 Fizz 34 Buzz Fizz 37 38 Fizz Buzz 41 Fizz 43 44 FizzBuzz 46 47 Fizz 49 Buzz Fizz 52 53 Fizz Buzz 56 Fizz 58 59 FizzBuzz 61 62 Fizz 64 Buzz Fizz 67 68 Fizz Buzz 71 Fizz 73 74 FizzBuzz 76 77 Fizz 79 Buzz Fizz 82 83 Fizz Buzz 86 Fizz 88 89 FizzBuzz 91 92 Fizz 94 Buzz Fizz 97 98 Fizz Buzz
+
+#+BEGIN_NOTES
+- Success!
+#+END_NOTES
+
+* We're doomed
+
+[[./assets/robots.jpg]]
+
+#+BEGIN_NOTES
+- We're doomed!
+- And on that bombshell, I'll wrap things up
+#+END_NOTES
+
+* (A sample of) things I skipped
+
+#+ATTR_REVEAL: :frag appear :frag_idx 1
+- Significance tests
+- /t/-distribution
+- Classifier evaluators
+- Cross-validation
+- Recurrent NNs
+- LSTM NNs
+- ...
+
+#+BEGIN_NOTES
+- This was a quick skip through a bunch of machine learning topics that interest me
+- Haven't done more than whet your appetite
+#+END_NOTES
+
+* Further reading
+
+#+ATTR_REVEAL: :frag (appear)
+- http://joelgrus.com/2016/05/23/fizz-buzz-in-tensorflow/
+  - Fizzbuzz in Tensorflow
+- http://github.com/thinktopic/cortex
+  - Examples of deeper neural networks
+- https://deeplearning4j.org/
+  - Java Deep Learning
+- https://www.chrisstucchio.com/
+  - Probability and statistics
+- http://www.wiki.cl.cam.ac.uk/rowiki/NaturalLanguage/ALTA
+  - ALTA Institute
+
+#+BEGIN_NOTES
+- ALTA research institute has published papers on technology behind W&I
+- Check out their website if you're interested
+#+END_NOTES
+
+* If you liked this...
+
+http://cljds.com/cljds-book | 
+http://cljds.com/cljds-amzn
+
+[[./assets/clojure-data-science.png]]
+
+ https://github.com/clojuredatascience
+
+#+BEGIN_NOTES
+- If you liked this talk, you might also like the book
+- If you didn't like this, you still might like
+- Time for questions?
+#+END_NOTES
+
+* Thanks!
+
+https://github.com/henrygarner/cljx-december-2016
+
+[[./assets/henrygarner.jpeg]]
+
+Henry Garner
+
+@henrygarner
+
+#+BEGIN_NOTES
+- Thank you very much indeed
+#+END_NOTES

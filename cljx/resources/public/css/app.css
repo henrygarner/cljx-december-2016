@@ -1,0 +1,45 @@
+body {
+    font: 1em sans-serif;
+}
+
+svg {
+    display: block;
+}
+
+.sample-mean line {
+    stroke: black;
+    stroke-width: 2px;
+}
+
+.population-mean line {
+    stroke: black;
+    stroke-dasharray: 2,5;
+    stroke-width: 2px;
+}
+
+g.bar.series-0 rect {
+    fill: steelblue;
+}
+
+g.bar.series-1 rect {
+    fill: lightsteelblue;
+}
+
+g.bar rect {
+    fill: steelblue;
+}
+
+path {
+    stroke: none;
+    fill: lightsteelblue;
+    fill-opacity: 0.4;
+}
+
+input[type=range] {
+    width: 100%;
+}
+
+g.axis line {
+    stroke: black;
+    stroke-width: 2px;
+}
