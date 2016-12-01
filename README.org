@@ -656,8 +656,9 @@ http://www.topendsports.com/athletes/swimming/spitz-mark.htm
 #+BEGIN_SRC clojure
 (def fy :weight)
 (def fx :height)
+
 (def regression
-  (stats/simple-linear-regression fx fy))
+  (kixi/simple-linear-regression fx fy))
 
 (def data (filter swimmer? (data-source "athletes")))
 
@@ -692,12 +693,10 @@ http://www.topendsports.com/athletes/swimming/spitz-mark.htm
 * 
 
 #+BEGIN_SRC clojure
-
 (def fy :weight)
 (def fx :height)
 
-(def estimate-error
-  (stats/standard-error-prediction fx fy 185))
+(def estimate-error (kixi/standard-error-prediction fx fy 185))
 
 (def data (filter swimmer? (data-source "athletes")))
 
@@ -708,7 +707,6 @@ http://www.topendsports.com/athletes/swimming/spitz-mark.htm
                               [(- estimate (* std-e 1.94))
                                (+ estimate (* std-e 1.94))]))]
   (confidence-interval 185))
-
 ;; [65.97046903896646 88.22760254435903]
 #+END_SRC
 
@@ -818,8 +816,8 @@ $${{R^2 = 1 - \frac{var(e)}{var(Y)}}}$$
 
 (defn r-square [fy-hat fy]
  
-                  (pre-step variance (residual fy-hat fy))
-                  (pre-step variance fy)
+                  (pre-step kixi/variance (residual fy-hat fy))
+                  (pre-step kixi/variance fy)
 
                              )
 #+END_SRC
@@ -838,8 +836,8 @@ $${{R^2 = 1 - \frac{var(e)}{var(Y)}}}$$
 
 (defn r-square [fy-hat fy]
  
-    (fuse {:var-e (pre-step variance (residual fy-hat fy))
-           :var-y (pre-step variance fy)})
+    (fuse {:var-e (pre-step kixi/variance (residual fy-hat fy))
+           :var-y (pre-step kixi/variance fy)})
 
                              )
 #+END_SRC
@@ -857,8 +855,8 @@ $${{R^2 = 1 - \frac{var(e)}{var(Y)}}}$$
 
 (defn r-square [fy-hat fy]
   (post-complete
-    (fuse {:var-e (pre-step variance (residual fy-hat fy))
-           :var-y (pre-step variance fy)})
+    (fuse {:var-e (pre-step kixi/variance (residual fy-hat fy))
+           :var-y (pre-step kixi/variance fy)})
     (fn [{:keys [var-e var-y]}]
       (- 1 (/ var-e var-y)))))
 #+END_SRC
@@ -873,7 +871,9 @@ $${{R^2 = 1 - \frac{var(e)}{var(Y)}}}$$
 #+BEGIN_SRC clojure
 (def fy :weight)
 (def fx :height)
+
 (def regression (kixi/simple-linear-regression fx fy))
+
 (def data (filter swimmer? (data-source "athletes")))
 
 (let [[b a] (transduce identity regression data)
@@ -896,7 +896,6 @@ $${{R^2 = 1 - \frac{var(e)}{var(Y)}}}$$
 $${{\theta = (X^TX)^{-1}X^Ty}}$$
 
 #+BEGIN_SRC clojure
-;; core.matrix includes
 (require '[clojure.core.matrix :refer [mmul transpose]]
          '[clojure.core.matrix.linear :refer [solve]])
 
